@@ -1,0 +1,36 @@
+{
+  "name": "cozumkupu-graphql",
+  "version": "1.0.0",
+  "description": "apollo-graphql,cozumkupu,main-service",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/business-helper/cozumkupu-graphql.git"
+  },
+  "keywords": [
+    "apollo",
+    "graphql",
+    "cozumkupu",
+    "mainservice",
+    "federation"
+  ],
+  "author": "busihelper",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/business-helper/cozumkupu-graphql/issues"
+  },
+  "homepage": "https://github.com/business-helper/cozumkupu-graphql#readme",
+  "dependencies": {
+    "@apollo/gateway": "^0.16.5",
+    "apollo-server": "^2.14.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "graphql": "^15.1.0",
+    "nodemon": "^2.0.4"
+  }
+}
