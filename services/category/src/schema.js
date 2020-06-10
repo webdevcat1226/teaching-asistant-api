@@ -10,11 +10,13 @@ module.exports = gql`
     }
 
     type Query {
-        cities(forceUpdate: String): [City]!
+        city(_id: ID, code: Int): City
+        cities(offset: Int, limit: Int, forceUpdate: String): [City]!
     }
 
     type Mutation {
         addCity(cityName: String!): CityResponse!
+        updateCity(_id: ID, code: Int, cityName: String!): CityResponse!
     }
 
     type CityResponse {

@@ -1,17 +1,41 @@
 const mongoose = require('mongoose');
+const {
+  UserInputError
+} = require('apollo-server');
 const City = require("./models/city.model");
 // const { checkToken } = require('./libs/middleware');
 const Utils = require("./utils");
 
-
 module.exports = {
   Query: {
-    cities: async (_, __, { token }) => {
+    cities: async (_, args, { token }) => {
       // Utils.checkToken(token); //console.log(decoded);
       let where = {};
-      const arr = await City.find(where); // console.log(projects);
-      return arr;
+      let cities = [];
+      const offset = args.offset !== undefined ? args.offset : 0;
+      if (args.limit !== undefined) {
+        cities = await City.find(where).skip(offset).limit(args.limit);
+      } else {
+        cities = await City.find(where);
+      }
+      return cities;
     },
+    city: async (_, args, { token }) => {
+      if (args._id === undefined && args.code === undefined) {
+        throw new UserInputError('Either of _id or code is required', {
+          invalidArgs: ['_id', 'code']
+        });
+      }
+      let where = {};
+      if (args._id !== undefined) {
+        where._id = args._id;
+      }
+      if (args.code !== undefined) {
+        where.code = args.code;
+      }
+      const city = await City.findOne(where);
+      return city;
+    }
   },
 
   Mutation: {
@@ -31,8 +55,7 @@ module.exports = {
         };
       }
 
-      lastCity = await City.findOne({}).sort({code: 1});
-
+      lastCity = await City.findOne({}).sort({ code: -1 });
       let city = {
         _id: new mongoose.mongo.ObjectId(),
         code: !lastCity ? 1 : lastCity.code + 1,
@@ -40,7 +63,6 @@ module.exports = {
       };
 
       const created = await City.create(city);
-      console.log(created)
       if (!created) {
         return {
           status: 'Error',
@@ -52,14 +74,39 @@ module.exports = {
           status: 'Success',
           message: "You added a new city successfully",
           content: {
-            city: {
-              _id: created.id,
-              code: created.code,
-              cityName: created.cityName,
-            }
+            city: Utils.factorCity(created)
           }
         };
       }
     },
+    updateCity: async (_, args, { token }) => {
+      if (args._id !== undefined && args.code === undefined) {
+        throw new UserInputError('Either of _id or code is required', {
+          invalidArgs: ['_id', 'code']
+        });
+      }
+
+      let where = {};
+      if (args._id !== undefined) {
+        where._id = args._id;
+      }
+      if (args.code !== undefined) {
+        where.code = args.code;
+      } console.log(where);
+      const updated = await City.findOneAndUpdate(where, { cityName: args.cityName }, { returnOriginal: false });
+      if (!!updated) {
+        return {
+          status: 'Success',
+          message: 'Data has been updated successfully',
+          content: { city: Utils.factorCity(updated) },
+        };
+      } else {
+        return {
+          status: 'Error',
+          message: 'Failed to udpate data...',
+          content: { city: Utils.factorCity(updated) },
+        };
+      }
+    }
   }
 };
