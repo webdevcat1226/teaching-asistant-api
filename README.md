@@ -29,6 +29,9 @@ prefer using <b>lowerCamelCase</b>.
 
 ## Structure
 
+- category subservice
+
+ includes city, district, role
 
 ## Change log
 
