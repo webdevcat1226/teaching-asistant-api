@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/federation": "^0.16.5",
     "apollo-server": "^2.14.3",
+    "bcrypt": "^5.0.0",
     "dotenv": "^8.2.0",
     "graphql": "^15.1.0",
     "jsonwebtoken": "^8.5.1",

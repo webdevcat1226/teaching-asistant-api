@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const typeDefs = require('./schema');
-const resolvers = require('./resolvers');
+const resolvers = require('./resolver');
 
 
 // Direct connection via context
