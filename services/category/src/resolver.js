@@ -97,7 +97,6 @@ module.exports = {
   },
 
 
-
   Mutation: {
     // -----   C I T Y   -----
 
@@ -266,10 +265,32 @@ module.exports = {
       else { return { status: 'Success', message: "Data had been added successfully", content: Utils.factorRoleAuthority.unit(created) }; }
     },
     updateRoleAuthority: async (_, args, { token }) => {
+      Utils.checkOptionalRequired(args, ['roleId', 'module', 'roleConstant']);
+      const roleAuthority = await RoleAuthority.findOne({_id: args._id});
+      if (!roleAuthority) { return { status: 'Error', message: 'Not found data', content: {} }; }
 
+      let updateData = { roleId: roleAuthority.roleId, module: roleAuthority.module, roleConstant: roleAuthority.roleConstant };
+      let update_count = 0;
+      if (!!args.roleId && args.roleId != updateData.roleId) { updateData.roleId = args.roleId; update_count ++; }
+      if (!!args.module && args.module != updateData.module) { updateData.module = args.module; update_count ++; }
+      if (!!args.roleConstant && args.roleConstant != updateData.roleConstant) { updateData.roleConstant = args.roleConstant; update_count++; }
+
+      if (update_count === 0) { return { status: 'Status', message: 'Data has been updated successfully', content: Utils.factorRoleAuthority.unit(roleAuthority) }; }
+
+      const updateExist = await RoleAuthority.findOne(updateData);
+      if (!!updateExist) { return {status: 'Error', message: 'Same info already exists.', content: {}}; }
+
+      const updated = await RoleAuthority.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      if (!!updated) { return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorRoleAuthority.unit(updated) }; }
+      else { return { status: 'Error', message: 'Failed to update data...', content: {} }; }
     },
-    deleteRoelAuthority: async (_, args, { token }) => {
-
+    deleteRoleAuthority: async (_, args, { token }) => {
+      try {
+        const deleted = await RoleAuthority.deleteOne({_id: args._id});
+        return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+      } catch (e) {
+        return { status: 'Error', message: 'Failed to delete data...', content: e.message };
+      }
     },
 
   }

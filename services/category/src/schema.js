@@ -71,7 +71,7 @@ module.exports = gql`
         # -----     R O L E    A U T H O R I T Y     -----
         addRoleAuthority(roleId: String!, module: ROLE_MODULE!, roleConstants: ROLE_CONSTANT!): CategoryResponse!
         updateRoleAuthority(_id: ID!, roleId: String, module: ROLE_MODULE, roleConstants: ROLE_CONSTANT): CategoryResponse!
-        deleteRoelAuthority(_id: ID!): CategoryResponse!
+        deleteRoleAuthority(_id: ID!): CategoryResponse!
     }
 
     type CategoryResponse {
