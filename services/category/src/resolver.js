@@ -6,6 +6,7 @@ const {
 const City = require("./models/city.model");
 const District = require('./models/district.model');
 const Role = require('./models/role.model');
+const RoleAuthority = require('./models/roleAuthority.model');
 
 // const { checkToken } = require('./libs/middleware');
 const Utils = require("./utils");
@@ -75,7 +76,24 @@ module.exports = {
     role: async (_, args, { token }) => {
       const role = await Role.findOne({ _id: args._id });
       return Utils.factorRole.unit(role);
-    }
+    },
+
+    // -----     R O L E    A U T H O R I T Y     -----
+    roleAuthority: async (_, args, { token }) => {
+      const roleAuthority = await RoleAuthority.findOne({ _id: args._id });
+      return Utils.factorRoleAuthority.unit(roleAuthority);
+    },
+    roleAuthorities: async (_, args, { token }) => {
+      let where = {};
+      if (!!args.roleId) { where.roleId = args.roleId; }
+      if (!!args.module) { where.module = args.module; }
+      if (!!args.roleConstant) { where.roleConstant = args.roleConstant; }
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+
+      const roleAuthorities = await RoleAuthority.find(where).skip(offset).limit(limit);
+      return Utils.factorRoleAuthority.array(roleAuthorities);
+    },
   },
 
 
@@ -235,6 +253,23 @@ module.exports = {
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
+    },
+
+    // -----     R O L E    A U T H O R I T Y     -----
+    addRoleAuthority: async (_, args, { token }) => {
+      const duplicated = await Utils.checkDuplicate.roleAuthority({ roleId: args.roleId, module: args.module, roleConstant: args.roleConstant });
+      if (duplicated === true) { return { status: 'Error', message: 'Role authority already defined!', content: {} }; }
+
+      let roleAuthority = { _id: mongoose.mongo.ObjectId(), roleId: args.roleId, module: args.module,  roleConstant: args.roleConstant };
+      const created = await RoleAuthority.create(roleAuthority);
+      if (!created) { return { status: 'Error', message: 'Failed to add data', content: {} }; }
+      else { return { status: 'Success', message: "Data had been added successfully", content: Utils.factorRoleAuthority.unit(created) }; }
+    },
+    updateRoleAuthority: async (_, args, { token }) => {
+
+    },
+    deleteRoelAuthority: async (_, args, { token }) => {
+
     },
 
   }

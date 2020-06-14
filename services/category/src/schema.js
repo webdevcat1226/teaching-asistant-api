@@ -3,6 +3,12 @@ module.exports = gql`
     
     scalar JSON
    
+    enum ROLE_MODULE { Book BookTest BookTestAnswer BookUnit BookUnitPart BookUnitPartSubTopic BookUnitTopic City District Exam ExamSet ExamSetTest ExamSetTestAnswer Friend Homework HomeworkAnswer HomeworkContent Lesson Manager Publisher Role RoleAuthority School Student SubTopic Teacher Topic Category ExamSetBookie ExamSetTestLessons Supports }
+
+    enum ROLE_CONSTANT { Select Insert Update Delete }
+
+
+
     type City @key(fields: "_id code"){
         _id: ID!,
         code: Int,
@@ -21,6 +27,13 @@ module.exports = gql`
         description: String
     }
 
+    type RoleAuthority @key(fields: "_id") {
+        _id: ID!
+        roleId: String
+        module: ROLE_MODULE
+        roleConstant: ROLE_CONSTANT
+    }
+
     type Query {
         # -----   C I T Y   -----
         city(_id: ID, code: Int): City
@@ -33,6 +46,10 @@ module.exports = gql`
         # -----     R O L E     -----
         role(_id: ID!): Role
         roles(offset: Int, limt: Int, forceUpdate: String): [Role]!
+
+        # -----     R O L E    A U T H O R I T Y     -----
+        roleAuthority(_id: ID!): RoleAuthority
+        roleAuthorities(roleId: String, module: ROLE_MODULE, roleConstant: ROLE_CONSTANT, offset: Int, limit: Int, forceUpdate: String): [RoleAuthority]!
     }
 
     type Mutation {
@@ -50,6 +67,11 @@ module.exports = gql`
         addRole(title: String!, description: String!): CategoryResponse!
         updateRole(_id: ID!, title: String, description: String): CategoryResponse!
         deleteRole(_id: ID!): CategoryResponse!
+
+        # -----     R O L E    A U T H O R I T Y     -----
+        addRoleAuthority(roleId: String!, module: ROLE_MODULE!, roleConstants: ROLE_CONSTANT!): CategoryResponse!
+        updateRoleAuthority(_id: ID!, roleId: String, module: ROLE_MODULE, roleConstants: ROLE_CONSTANT): CategoryResponse!
+        deleteRoelAuthority(_id: ID!): CategoryResponse!
     }
 
     type CategoryResponse {
