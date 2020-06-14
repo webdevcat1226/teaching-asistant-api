@@ -1,6 +1,7 @@
 
 const Manager = require('./models/manager.model');
 const Student = require('./models/student.model');
+const Teacher = require('./models/teacher.model');
 
 const setValue = (val, alt) => {
     return val !== undefined ? val : alt;
@@ -53,6 +54,26 @@ const factorStudentArray = (dataSet) => {
     return !!dataSet && dataSet.length > 0 ? (dataSet.map(data => factorStudent(data))) : [];
 }
 
+// Teacher
+const checkTeacherDuplicated = async (where) => {
+    const teacher = await Teacher.findOne(where);
+    return !!teacher;
+}
+
+const factorTeacher = data => {
+    const fields = ['_id', 'schoolId', 'roleId', 'name', 'surname', 'dateOfBirth', 'password', 'gsm', 'email', 'isConfirmed', 'registrationDate', 'facebook', 'instagram', 'twitter', 'image'];
+    if (!data) return null;
+    let teacher = {
+        'confirmationKey': 0,
+    };
+
+    for (let fld of fields) { teacher[fld] = data[fld]; }
+    return teacher; 
+}
+
+const factorTeachers = teachers => {
+    return !!teachers && teachers.length > 0 ? (teachers.map(teacher => factorTeacher(teacher))) : [];
+}
 
 module.exports = {
     manager: {
@@ -69,4 +90,11 @@ module.exports = {
         },
         checkDuplicate: checkStudentDuplicated
     },
+    teacher: {
+        factor: {
+            unit: factorTeacher,
+            array: factorTeachers,
+        },
+        checkDuplicate: checkTeacherDuplicated,
+    }
 };

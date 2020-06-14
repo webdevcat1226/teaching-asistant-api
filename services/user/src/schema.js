@@ -41,6 +41,24 @@ module.exports = gql`
         image: String,
     }
 
+    type Teacher @key(fields: "_id") {
+        _id: ID!,
+        schoolId: String,
+        roleId: String,
+        name: String,
+        surname: String,
+        dateOfBirth: String,
+        password: String,
+        gsm: String,
+        email: String,
+        confirmationKey: Int,
+        isConfirmed: Boolean,
+        registrationDate: String,
+        facebook: String,
+        instagram: String,
+        image: String,
+    }
+
     type Query {
         # -----   M A N A G E R   -----
         manager(_id: ID!): Manager
@@ -49,6 +67,10 @@ module.exports = gql`
         # -----   S T U D E N T   -----
         student(_id: ID!): Student
         students(schoolId: String, studentMemberTypeId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Student]!
+
+        # -----   T E A C H E R   -----
+        teacher(_id: ID!): Teacher
+        teachers(schoolId: String, roleId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Teacher]!
 
     }
 
@@ -62,10 +84,17 @@ module.exports = gql`
         getToken( email: String!, password: String!, clientType: String! ): UserResponse!
         verifyToken( token: String! ): UserResponse!
 
-        # -----   M A N A G E R   -----
+        # -----   S T U D E N T   -----
         addStudent(schoolId: String, studentMemberTypeId: String, name: String!, surname: String!, dateOfBirth: String!, password: String!, gsm: String!, email: String!, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
         updateStudent(_id: ID!, schoolId: String, studentMemberTypeId: String, name: String, surname: String, dateOfBirth: String, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
         deleteStudent(_id: ID!): UserResponse!
+        confirmStudent(_id: ID!, confirmationKey: Int!): UserResponse!
+
+        # -----   T E A C H E R   -----
+        addTeacher(schoolId: String, roleId: String, name: String!, surname: String!, dateOfBirth: String, password: String!, gsm: String!, email: String!, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
+        updateTeacher(_id: ID!, schoolId: String, roleId: String, name: String, surname: String, dateOfBirth: String, facebook: String, instagram: String, twitter: String, image: String): UserResponse!
+        deleteTeacher(_id: ID!): UserResponse!
+        confirmTeacher(_id: ID!, confirmationKey: Int!): UserResponse!
         
     }
 
