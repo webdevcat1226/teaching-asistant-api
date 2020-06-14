@@ -8,6 +8,8 @@ const District = require('./models/district.model');
 const Role = require('./models/role.model');
 const RoleAuthority = require('./models/roleAuthority.model');
 const School = require('./models/school.model');
+const StudentMemberType = require('./models/studentMemberType.model');
+
 
 // const { checkToken } = require('./libs/middleware');
 const Utils = require("./utils");
@@ -109,6 +111,18 @@ module.exports = {
       const limit = !!args.limit ? args.limit : 0;
       const schools = await School.find(where).skip(offset).limit(limit); console.log('school', schools);
       return Utils.factorSchool.array(schools);
+    },
+
+    // -----     STUDENT MEMBER TYPE     -----
+    studentMemberType: async (_, args, { token }) => {
+      const smt = await StudentMemberType.findOne({_id: args._id});
+      return Utils.factorSMT.unit(smt);
+    },
+    studentMemberTypes: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      const smts = await StudentMemberType.find().skip(offset).limit(limit);
+      return Utils.factorSMT.array(smts);
     },
   },
 
@@ -321,7 +335,7 @@ module.exports = {
     },
     updateSchool: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['districtId', 'name']);
-      const school = await School.findOne({ districtId: args.districtId, name: args.name });
+      const school = await School.findOne({ _id: args._id });
       if (!school) { return {status: 'Error', message: 'Not found data', content: {}}; }
 
       let updateData = { districtId: school.districtId, name: school.name };
@@ -344,6 +358,44 @@ module.exports = {
         return { success: 'Success', message: 'Data has been deleted successfully', content: deleted };
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
+      }
+    },
+
+    // -----     STUDENT MEMBER TYPE     -----
+    addStudentMemberType: async (_, args, { token }) => {
+      const duplicated = await Utils.checkDuplicate.smt({ typeTitle: args.typeTitle });
+      if (!!duplicated) { return {status: 'Error', message: 'Student member type already exists', content: {}}; }
+
+      let smt = { _id: new mongoose.mongo.ObjectId(), typeTitle: args.typeTitle, descriptions: args.descriptions || "", piece: args.piece || 0 };
+      const created = await StudentMemberType.create(smt);
+      if (!created) { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+      else { return {status: 'Success', message: 'Data had been added successfully', content: Utils.factorSMT.unit(created)}; }
+    },
+    updateStudentMemberType: async (_, args, { token }) => {
+      Utils.checkOptionalRequired(args, ['typeTitle', 'descriptions', 'piece']);
+      const smt = await StudentMemberType.findOne({_id: args._id});
+      if (!smt) { return {status: 'Error', message: "Not found data", content: {}}; }
+
+      let updateData = { typeTitle: smt.typeTitle, descriptions: smt.descriptions, piece: smt.piece };
+      let update_count = 0;
+      if (!!args.typeTitle && args.typeTitle != updateData.typeTitle) { updateData.typeTitle = args.typeTitle; update_count ++; }
+      if (!!args.descriptions && args.descriptions != updateData.descriptions) { updateData.descriptions = args.descriptions; update_count ++; }
+      if (!!args.piece && args.piece !== updateData.piece) { updateData.piece = args.piece; update_count ++; }
+
+      const updateExists = await StudentMemberType.findOne({typeTitle: args.typeTitle});
+      if (!!updateExists) { return {status: 'Error', message: 'Same info already exists.', content: {}}; }
+
+      const updated = await StudentMemberType.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSMT.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+
+    },
+    deleteStudentMemberType: async (_, args, { token }) => {
+      try {
+        const deleted = await StudentMemberType.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data had been deleted successfully', content: deleted};
+      } catch (e) {
+        return {status: 'Error', message: 'Failed to delete data...', content: e.message};
       }
     },
 

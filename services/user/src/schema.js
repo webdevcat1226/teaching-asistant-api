@@ -3,25 +3,6 @@ module.exports = gql`
     
     scalar JSON
 
-    enum ROLE {
-        OWNER
-        MANAGER
-        MENTOR
-        TEAM_MEMBER
-    }    
-    
-    enum SUBROLE {
-        SITE_MANAGER
-        BUSINESS_COACH
-        SME
-        NONE
-    }
-
-    enum USER_PROJECT_TYPE {
-        ASSIGN
-        JOIN
-    }
-
     type Manager @key(fields: "_id"){
         _id: ID!,
         roleId: String,

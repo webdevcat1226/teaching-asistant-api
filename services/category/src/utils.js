@@ -5,6 +5,7 @@ const District = require('./models/district.model');
 const Role = require('./models/role.model');
 const RoleAuthority = require('./models/roleAuthority.model');
 const School = require('./models/school.model');
+const StudentMemberType = require('./models/studentMemberType.model');
 
 
 const checkOptionalRequired = (data, members) => {
@@ -90,12 +91,32 @@ const factorSchoolArray = schools => {
     return schools && schools.length > 0 ? (schools.map(school => factorSchool(school))) : [];
 }
 
+
+/**
+ *   ---   STUDENT MEMBER TYPE  ---
+ * */ 
+const checkStudentMemberTypeDuplicated = async (where) => {
+    const smt = await StudentMemberType.findOne(where);
+    return !!smt;
+}
+
+const factorSMT = smt => {
+    return !!smt ? { _id: smt._id, typeTitle: smt.typeTitle, descriptions: smt.descriptions, piece: smt.piece } : null;
+}
+
+const factorSMTArray = smts => {
+    return !!smts && smts.length > 0 ? (smts.map(smt => factorSMT(smt))) : [];
+}
+
+
+
 module.exports = {
     checkDuplicate: {
         district: checkDistrictDuplicated,
         role: checkRoleDuplicated,
         roleAuthority: checkRoleAuthorityDuplicated,
         school: checkSchoolDuplicated,
+        smt: checkStudentMemberTypeDuplicated,
     },
     checkOptionalRequired: checkOptionalRequired,
     factorCity: factorCity,
@@ -115,5 +136,9 @@ module.exports = {
     factorSchool: {
         unit: factorSchool,
         array: factorSchoolArray,
+    },
+    factorSMT: {
+        unit: factorSMT,
+        array: factorSMTArray,
     }
 }

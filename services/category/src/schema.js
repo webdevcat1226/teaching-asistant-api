@@ -40,6 +40,13 @@ module.exports = gql`
         name: String
     }
 
+    type StudentMemberType @key(fields: "_id") {
+        _id: ID!
+        typeTitle: String!
+        descriptions: String
+        piece: Int
+    }
+
     type Query {
         # -----   C I T Y   -----
         city(_id: ID, code: Int): City
@@ -60,6 +67,10 @@ module.exports = gql`
         # -----     S C H O O L     -----
         school(_id: ID!): School
         schools(districtId: String, name: String, offset: Int, limit: Int, forceUpdate: String): [School]!
+
+        # -----     STUDENT MEMBER TYPE     -----
+        studentMemberType(_id: ID!): StudentMemberType
+        studentMemberTypes(offset: Int, limit: Int, forceUpdate: String): [StudentMemberType]!
     }
 
     type Mutation {
@@ -87,6 +98,11 @@ module.exports = gql`
         addSchool(districtId: String!, name: String!): CategoryResponse!
         updateSchool(_id: ID!, districtId: String, name: String): CategoryResponse!
         deleteSchool(_id: ID!): CategoryResponse!
+
+        # -----     STUDENT MEMBER TYPE     -----
+        addStudentMemberType(typeTitle: String!, descriptions: String, piece: Int): CategoryResponse!
+        updateStudentMemberType(_id: ID!, typeTitle: String, descriptions: String, piece: Int): CategoryResponse!
+        deleteStudentMemberType(_id: ID!): CategoryResponse!
     }
 
     type CategoryResponse {
