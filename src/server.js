@@ -2,6 +2,8 @@ const { ApolloServer } = require('apollo-server');
 const { ApolloGateway, RemoteGraphQLDataSource } = require('@apollo/gateway');
 require('dotenv').config();
 const cors = require('cors');
+// const emitter = new EventEmitter();
+process.setMaxListeners(0);
 
 class AuthenticatedDataSource extends RemoteGraphQLDataSource {
   willSendRequest({ request, context }) {

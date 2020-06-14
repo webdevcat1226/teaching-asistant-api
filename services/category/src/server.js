@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const typeDefs = require('./schema');
 const resolvers = require('./resolver');
-
+process.setMaxListeners(0);
 
 // Direct connection via context
 mongoose.connect(process.env.DATABASE, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })

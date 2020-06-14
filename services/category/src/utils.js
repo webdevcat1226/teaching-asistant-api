@@ -4,6 +4,8 @@ const { UserInputError } = require('apollo-server');
 const District = require('./models/district.model');
 const Role = require('./models/role.model');
 const RoleAuthority = require('./models/roleAuthority.model');
+const School = require('./models/school.model');
+
 
 const checkOptionalRequired = (data, members) => {
     for (let fld of members) {
@@ -71,11 +73,29 @@ const checkRoleAuthorityDuplicated = async (where) => {
     return !!roleAuthority;
 }
 
+/**
+ *   ---   S C H O O L  ---
+ * */ 
+
+const checkSchoolDuplicated = async (where) => {
+    const duplicated = await School.findOne(where);
+    return !!duplicated;
+}
+
+const factorSchool = school => {
+    return !!school ? { _id: school._id, districtId: school.districtId, name: school.name } : null;
+}
+
+const factorSchoolArray = schools => {
+    return schools && schools.length > 0 ? (schools.map(school => factorSchool(school))) : [];
+}
+
 module.exports = {
     checkDuplicate: {
         district: checkDistrictDuplicated,
         role: checkRoleDuplicated,
         roleAuthority: checkRoleAuthorityDuplicated,
+        school: checkSchoolDuplicated,
     },
     checkOptionalRequired: checkOptionalRequired,
     factorCity: factorCity,
@@ -92,4 +112,8 @@ module.exports = {
         unit: factorRoleAuthority,
         array: factorRoleAuthorityArray,
     },
+    factorSchool: {
+        unit: factorSchool,
+        array: factorSchoolArray,
+    }
 }

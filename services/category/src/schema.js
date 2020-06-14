@@ -34,6 +34,12 @@ module.exports = gql`
         roleConstant: ROLE_CONSTANT
     }
 
+    type School @key(fields: "_id") {
+        _id: ID!
+        districtId: String
+        name: String
+    }
+
     type Query {
         # -----   C I T Y   -----
         city(_id: ID, code: Int): City
@@ -50,6 +56,10 @@ module.exports = gql`
         # -----     R O L E    A U T H O R I T Y     -----
         roleAuthority(_id: ID!): RoleAuthority
         roleAuthorities(roleId: String, module: ROLE_MODULE, roleConstant: ROLE_CONSTANT, offset: Int, limit: Int, forceUpdate: String): [RoleAuthority]!
+
+        # -----     S C H O O L     -----
+        school(_id: ID!): School
+        schools(districtId: String, name: String, offset: Int, limit: Int, forceUpdate: String): [School]!
     }
 
     type Mutation {
@@ -72,6 +82,11 @@ module.exports = gql`
         addRoleAuthority(roleId: String!, module: ROLE_MODULE!, roleConstants: ROLE_CONSTANT!): CategoryResponse!
         updateRoleAuthority(_id: ID!, roleId: String, module: ROLE_MODULE, roleConstants: ROLE_CONSTANT): CategoryResponse!
         deleteRoleAuthority(_id: ID!): CategoryResponse!
+
+        # -----     S C H O O L     -----
+        addSchool(districtId: String!, name: String!): CategoryResponse!
+        updateSchool(_id: ID!, districtId: String, name: String): CategoryResponse!
+        deleteSchool(_id: ID!): CategoryResponse!
     }
 
     type CategoryResponse {

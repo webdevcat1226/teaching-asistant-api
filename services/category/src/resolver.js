@@ -7,6 +7,7 @@ const City = require("./models/city.model");
 const District = require('./models/district.model');
 const Role = require('./models/role.model');
 const RoleAuthority = require('./models/roleAuthority.model');
+const School = require('./models/school.model');
 
 // const { checkToken } = require('./libs/middleware');
 const Utils = require("./utils");
@@ -93,6 +94,21 @@ module.exports = {
 
       const roleAuthorities = await RoleAuthority.find(where).skip(offset).limit(limit);
       return Utils.factorRoleAuthority.array(roleAuthorities);
+    },
+
+    // -----     S C H O O L     -----
+    school: async (_, args, { token }) => {
+      const school = await School.findOne({_id: args._id});
+      return Utils.factorSchool.unit(school);
+    },
+    schools: async(_, args, { token }) => {
+      let where = {};
+      if (!!args.districtId) { where.districtId = args.districtId; }
+      if (!!args.name) { where.name = new RegExp(args.name, 'i'); }
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      const schools = await School.find(where).skip(offset).limit(limit); console.log('school', schools);
+      return Utils.factorSchool.array(schools);
     },
   },
 
@@ -292,6 +308,45 @@ module.exports = {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
     },
+
+    // -----     S C H O O L     -----
+    addSchool: async (_, args, { token }) => {
+      const duplicated = await Utils.checkDuplicate.school({ districtId: args.districtId, name: args.name });
+      if (!!duplicated) { return {status: 'Error', message: 'School already exists!', content: {}}; }
+
+      let school = { _id: new mongoose.mongo.ObjectId(), districtId: args.districtId, name: args.name };
+      const created = await School.create(school);
+      if (!created) { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+      else { return {status: 'Success', message: 'Data has been added successfully', content: Utils.factorSchool.unit(created) }; }
+    },
+    updateSchool: async (_, args, { token }) => {
+      Utils.checkOptionalRequired(args, ['districtId', 'name']);
+      const school = await School.findOne({ districtId: args.districtId, name: args.name });
+      if (!school) { return {status: 'Error', message: 'Not found data', content: {}}; }
+
+      let updateData = { districtId: school.districtId, name: school.name };
+      let update_count = 0;
+      if (!!args.districtId && args.districtId != updateData.districtId) { update.districtId = args.districtId; update_count++; }
+      if (!!args.name && args.name != updateData.name) { updateData.name = args.name; update_count++; }
+
+      if (update_count === 0) { return {status: 'Success', message: 'Data has been created successfully', content: Utils.factorSchool.unit(school)}; }
+
+      const updateExists = await School.findOne(updateData);
+      if (!!updateExists) { return { status: 'Error', message: 'Same info already exists', content: {}}; }
+
+      const updated = await School.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSchool.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+    },
+    deleteSchool: async (_, args, { token }) => {
+      try {
+        const deleted = await School.deleteOne({_id: args._id});
+        return { success: 'Success', message: 'Data has been deleted successfully', content: deleted };
+      } catch (e) {
+        return { status: 'Error', message: 'Failed to delete data...', content: e.message };
+      }
+    },
+
 
   }
 };
