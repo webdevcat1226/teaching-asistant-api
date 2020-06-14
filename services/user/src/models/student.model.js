@@ -5,10 +5,7 @@ const Schema = mongoose.Schema;
 let Student = new Schema({
     _id: mongoose.Schema.Types.ObjectId,
     schoolId: String,
-    
-    roleId: String,
-    districtId: String,
-    isSystemAdministrator: Boolean,
+    studentMemberTypeId: String,
     name: String,
     surname: String,
     dateOfBirth: Date,
@@ -19,7 +16,6 @@ let Student = new Schema({
     isConfirmed: Boolean,
     registrationDate: Date,
     facebook: String,
-    twitter: String,
     instagram: String,
     image: String,
     token: String,

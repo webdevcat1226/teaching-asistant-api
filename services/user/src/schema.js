@@ -23,9 +23,33 @@ module.exports = gql`
         image: String,
     }
 
+    type Student @key(fields: "_id") {
+        _id: ID!,
+        schoolId: String,
+        studentMemberTypeId: String,
+        name: String,
+        surname: String,
+        dateOfBirth: String,
+        password: String,
+        gsm: String,
+        email: String,
+        confirmationKey: Int,
+        isConfirmed: Boolean,
+        registrationDate: String,
+        facebook: String,
+        instagram: String,
+        image: String,
+    }
+
     type Query {
+        # -----   M A N A G E R   -----
         manager(_id: ID!): Manager
         managers(roleId: String, districtId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Manager]!
+
+        # -----   S T U D E N T   -----
+        student(_id: ID!): Student
+        students(schoolId: String, studentMemberTypeId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Student]!
+
     }
 
     type Mutation {
@@ -37,6 +61,12 @@ module.exports = gql`
         confirmManager( _id: ID!, confirmationKey: Int! ): UserResponse!
         getToken( email: String!, password: String!, clientType: String! ): UserResponse!
         verifyToken( token: String! ): UserResponse!
+
+        # -----   M A N A G E R   -----
+        addStudent(schoolId: String, studentMemberTypeId: String, name: String!, surname: String!, dateOfBirth: String!, password: String!, gsm: String!, email: String!, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
+        updateStudent(_id: ID!, schoolId: String, studentMemberTypeId: String, name: String, surname: String, dateOfBirth: String, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
+        deleteStudent(_id: ID!): UserResponse!
+        
     }
 
     type UserResponse {
