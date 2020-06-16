@@ -67,6 +67,14 @@ module.exports = gql`
         address: String,
     }
 
+    type Friend @key (fields: "_id") {
+        _id: ID!,
+        studentId: String,
+        teacherId: String,
+        isAccepted: Boolean,
+        isSenderAsStudent: Boolean,
+    }
+
     type Query {
         # -----   M A N A G E R   -----
         manager(_id: ID!): Manager
@@ -84,6 +92,9 @@ module.exports = gql`
         publisher(_id: ID!): Publisher
         publishers(email: String, phone: String, name: String, address: String, offset: Int, limit: Int): [Publisher]!
 
+        # -----   F R I E N D   -----
+        friend(_id: ID!): Friend
+        friends(studentId: String, teacherId: String, isAccepted: Boolean, isSenderAsStudent: String, offset: Int, limit: Int): [Friend]!
     }
 
     type Mutation {
@@ -113,6 +124,10 @@ module.exports = gql`
         updatePublisher(_id: ID!, name: String, phone: String, address: String): UserResponse!
         deletePublisher(_id: ID!): UserResponse!
 
+        # -----   F R I E N D   -----
+        addFriend(studentId: String!, teacherId: String!, isAccepted: Boolean, isSenderAsStudent: Boolean!): UserResponse!
+        updateFriend(_id: ID!, isAccepted: Boolean, isSenderAsStudent: Boolean): UserResponse!
+        deleteFriend(_id: ID!): UserResponse!
 
     }
 

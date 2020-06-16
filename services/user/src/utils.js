@@ -3,6 +3,7 @@ const Manager = require('./models/manager.model');
 const Student = require('./models/student.model');
 const Teacher = require('./models/teacher.model');
 const Publisher = require('./models/publisher.model');
+const Friend = require('./models/friend.model');
 
 const setValue = (val, alt) => {
     return val !== undefined ? val : alt;
@@ -90,6 +91,20 @@ const factorPublishers = async (pbs) => {
     return !!pbs && pbs.length > 0 ? pbs.map(pb => factorPublisher(pb)) : [];
 }
 
+// Friend
+const checkFriendDuplicated = async where => {
+    const friend = await Friend.findOne(where);
+    return !!friend;
+}
+
+const factorFriend = async fd => {
+    return !!fd ? { _id: fd._id, studentId: fd.studentId, teacherId: fd.teacherId, isAccepted: fd.isAccepted, isSenderAsStudent: fd.isSenderAsStudent } : null;
+}
+
+const factorFriends = async fds => {
+    return !!fds && fds.length > 0 ? (fds.map(fd => factorFriend(fd))) : [];
+}
+
 
 module.exports = {
     manager: {
@@ -118,6 +133,13 @@ module.exports = {
         factor: {
             unit: factorPublisher,
             array: factorPublishers,
+        }
+    },
+    friend: {
+        checkDuplicate: checkFriendDuplicated,
+        factor: {
+            unit: factorFriend,
+            array: factorFriends,
         }
     },
 };

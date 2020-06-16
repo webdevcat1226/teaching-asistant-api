@@ -7,6 +7,7 @@ const Manager = require("./models/manager.model");
 const Student = require('./models/student.model');
 const Teacher = require('./models/teacher.model');
 const Publisher = require('./models/publisher.model');
+const Friend = require('./models/friend.model');
 
 const Utils = require("./utils");
 
@@ -82,6 +83,23 @@ module.exports = {
       return Utils.publisher.factor.array(publishers);
     },
 
+    // -----   F R I E N D   -----
+    friend: async (_, args, { token }) => {
+      const friend = await Friend.findOne({_id: args._id});
+      return Utils.friend.factor.unit(friend);
+    },
+    friends: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.studentId) { where.studentId = args.studentId; }
+      if (!!args.teacherId) { where.teacherId = args.teacherId; }
+      if (args.isAccepted !== undefined) { where.isAccepted = args.isAccepted; }
+      if (args.isSenderAsStudent !== undefined) { where.isSenderAsStudent = args.isSenderAsStudent; }
+
+      let friends = await Friend.find(where).skip(offset).limit(limit);
+      return Utils.friend.factor.array(friends);
+    },
 
   },
 
@@ -321,6 +339,37 @@ module.exports = {
     deletePublisher: async (_, args, { token }) => {
       try {
         const deleted = await Publisher.deleteOne({ _id: args._id });
+        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+      } catch (e) {
+        return {status: 'Error', message: 'Failed to delete data...', content: {}};
+      }
+    },
+
+    // -----   F R I E N D   -----
+    addFriend: async (_, args, { token }) => {
+      // todo - check student and teacher exists?
+
+      // check duplicated
+      const duplicated = await Utils.friend.checkDuplicate({ studentId: args.studentId, teacherId: args.teacherId });
+      if (!!duplicated) { return {status: 'Scucess', message: 'Dupliated data', content: {}}; }
+
+      const friend = { _id: new mongoose.mongo.ObjectId(), studentId: args.studentId, teacherId: args.teacherId, isAccepted: false, isSenderAsStudent: args.isSenderAsStudent || true };
+      const created = await Friend.create(friend);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.friend.factor.unit(created)}; }
+      else { return {status: 'Error', message: 'Failed to add data...', content: {}}; }
+    },
+    updateFriend: async (_, args, { token }) => {
+      let updateData = await Friend.findOne({ _id: args._id });
+
+      if (args.isAccepted !== undefined) { updateData.isAccepted = args.isAccepted; }
+      if (args.isSenderAsStudent !== undefined) { updateData.isSenderAsStudent = args.isSenderAsStudent; }
+      const updated = await Friend.findOneAndUpdate({_id: args._id}, updateData, {returnOriginal: false});
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.friend.factor.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+    },
+    deleteFriend: async (_, args, { token }) => {
+      try {
+        const deleted = await Friend.deleteOne({_id: args._id});
         return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
       } catch (e) {
         return {status: 'Error', message: 'Failed to delete data...', content: {}};
