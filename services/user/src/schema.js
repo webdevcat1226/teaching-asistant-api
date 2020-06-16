@@ -59,6 +59,14 @@ module.exports = gql`
         image: String,
     }
 
+    type Publisher @key (fields: "_id") {
+        _id: ID!,
+        name: String,
+        email: String,
+        phone: String,
+        address: String,
+    }
+
     type Query {
         # -----   M A N A G E R   -----
         manager(_id: ID!): Manager
@@ -71,6 +79,10 @@ module.exports = gql`
         # -----   T E A C H E R   -----
         teacher(_id: ID!): Teacher
         teachers(schoolId: String, roleId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Teacher]!
+
+        # -----   P U B L I S H E R   -----
+        publisher(_id: ID!): Publisher
+        publishers(email: String, phone: String, name: String, address: String, offset: Int, limit: Int): [Publisher]!
 
     }
 
@@ -96,6 +108,12 @@ module.exports = gql`
         deleteTeacher(_id: ID!): UserResponse!
         confirmTeacher(_id: ID!, confirmationKey: Int!): UserResponse!
         
+        # -----   P U B L I S H E R   -----
+        addPublisher(name: String!, email: String!, phone: String!, address: String!): UserResponse!
+        updatePublisher(_id: ID!, name: String, phone: String, address: String): UserResponse!
+        deletePublisher(_id: ID!): UserResponse!
+
+
     }
 
     type UserResponse {

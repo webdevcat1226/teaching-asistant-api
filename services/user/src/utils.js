@@ -2,6 +2,7 @@
 const Manager = require('./models/manager.model');
 const Student = require('./models/student.model');
 const Teacher = require('./models/teacher.model');
+const Publisher = require('./models/publisher.model');
 
 const setValue = (val, alt) => {
     return val !== undefined ? val : alt;
@@ -75,6 +76,21 @@ const factorTeachers = teachers => {
     return !!teachers && teachers.length > 0 ? (teachers.map(teacher => factorTeacher(teacher))) : [];
 }
 
+// Publisher
+const checkPublisherDuplicated = async (where) => {
+    const publisher = await Publisher.findOne(where);
+    return !!publisher;
+}
+
+const factorPublisher = async (pb) => {
+    return !!pb ? { _id: pb._id, name: pb.name, email: pb.email, phone: pb.phone, address: pb.address } : null;
+}
+
+const factorPublishers = async (pbs) => {
+    return !!pbs && pbs.length > 0 ? pbs.map(pb => factorPublisher(pb)) : [];
+}
+
+
 module.exports = {
     manager: {
         factor: {
@@ -96,5 +112,12 @@ module.exports = {
             array: factorTeachers,
         },
         checkDuplicate: checkTeacherDuplicated,
-    }
+    },
+    publisher: {
+        checkDuplicate: checkPublisherDuplicated,
+        factor: {
+            unit: factorPublisher,
+            array: factorPublishers,
+        }
+    },
 };

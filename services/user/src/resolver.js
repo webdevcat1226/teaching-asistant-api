@@ -6,6 +6,7 @@ require('dotenv').config();
 const Manager = require("./models/manager.model");
 const Student = require('./models/student.model');
 const Teacher = require('./models/teacher.model');
+const Publisher = require('./models/publisher.model');
 
 const Utils = require("./utils");
 
@@ -61,7 +62,26 @@ module.exports = {
       if (!!args.isConfirmed) { where.isConfirmed = args.isConfirmed; }
       const teachers = await Teacher.find(where).skip(offset).limit(limit);
       return Utils.teacher.factor.array(teachers);
-    }
+    },
+
+    // -----   P U B L I S H E R   -----
+    publisher: async (_, args, { token }) => {
+      const publisher = await Publisher.findOne({_id: args._id});
+      return Utils.publisher.factor.unit(publisher);
+    },
+    publishers: async (_, args, { token }) => { 
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.name) { where.name = new RegExp(args.name, 'i'); }
+      if (!!args.address) { where.address = new RegExp(args.address, 'i'); }
+      if (!!args.phone) { where.phone = args.phone; }
+      if (!!args.email) { where.email = args.email; }
+
+      let publishers = await Publisher.find(where).skip(offset).limit(limit);
+      return Utils.publisher.factor.array(publishers);
+    },
+
 
   },
 
@@ -278,5 +298,34 @@ module.exports = {
         return {status: 'Success', message: 'User had been verified successfully', content: Utils.teacher.factor.unit(updated)};
       } else { return {status: 'Error', message: 'Cofirmationkey does not match!', content: {}}; }
     },
+
+    // -----   P U B L I S H E R   -----
+    addPublisher: async (_, args, { token }) => {
+      const pubDuplicated = await Utils.publisher.checkDuplicate({ email: args.email });
+      if (!!pubDuplicated) { return {status: 'Error', message: 'Email already exists', content: {}}; }
+
+      let publisher = { _id: new mongoose.mongo.ObjectId(), email: args.email, name: args.name, phone: args.phone || "", address: args.address || "" };
+      const created = await Publisher.create(publisher);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.publisher.factor.unit(created)};}
+      else { return {status: 'Error', message: 'Failed to add data...', content: {}}; }
+    },
+    updatePublisher: async (_, args, { token }) => {
+      const fields = ['name', 'email', 'phone', 'address'];
+      let updateData = await Publisher.findOne({_id: args._id});
+
+      for (let fld of fields) { if (!!args[fld]) updateData[fld] = args[fld]; }
+      const updated = await Publisher.findOneAndUpdate({_id: args._id}, updateData, {returnOriginal: false});
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.publisher.factor.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+    },
+    deletePublisher: async (_, args, { token }) => {
+      try {
+        const deleted = await Publisher.deleteOne({ _id: args._id });
+        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+      } catch (e) {
+        return {status: 'Error', message: 'Failed to delete data...', content: {}};
+      }
+    },
+
   }
 };
