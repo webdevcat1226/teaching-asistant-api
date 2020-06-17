@@ -1,6 +1,7 @@
 # COZUMKUPU(Solution Cube)
 
-Solution community between teachers and students
+Solution community between teachers and students<b/>
+prefer to use 'npm' as package management tool.
 
 ## Tech stack
 

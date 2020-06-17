@@ -15,6 +15,7 @@ class AuthenticatedDataSource extends RemoteGraphQLDataSource {
 const serviceList = [
   { name: 'Category', url: `http://localhost:${process.env.PORT_CATEGORY}` },
   { name: 'User', url: `http://localhost:${process.env.PORT_USER}` },
+  { name: 'Exam', url: `http://localhost:${process.env.PORT_EXAM}` },
 ];
 // now done for gateway.
 
