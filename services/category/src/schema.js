@@ -8,6 +8,10 @@ module.exports = gql`
     enum ROLE_CONSTANT { Select Insert Update Delete }
 
 
+    type Category @key(fields: "_id") {
+        _id: ID!,
+        categoryTitle: String!
+    }
 
     type City @key(fields: "_id code"){
         _id: ID!,
@@ -48,6 +52,10 @@ module.exports = gql`
     }
 
     type Query {
+        # -----   C A T E G O R Y   -----
+        category(_id: ID!): Category
+        categories(categoryTitle: String, offset: Int, limit: Int): [Category]!
+
         # -----   C I T Y   -----
         city(_id: ID, code: Int): City
         cities(offset: Int, limit: Int, forceUpdate: String): [City]!
@@ -74,6 +82,11 @@ module.exports = gql`
     }
 
     type Mutation {
+        # -----   C A T E G O R Y   -----
+        addCategory(categoryTitle: String!): CategoryResponse!
+        updateCategory(_id: ID!, categoryTitle: String!): CategoryResponse!
+        deleteCategory(_id: ID!): CategoryResponse!
+
         # -----   C I T Y   -----
         addCity(cityName: String!): CategoryResponse!
         updateCity(_id: ID, code: Int, cityName: String!): CategoryResponse!

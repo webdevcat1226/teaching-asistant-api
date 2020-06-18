@@ -3,6 +3,7 @@ const {
   UserInputError
 } = require('apollo-server');
 
+const Category = require('./models/category.model');
 const City = require("./models/city.model");
 const District = require('./models/district.model');
 const Role = require('./models/role.model');
@@ -16,8 +17,22 @@ const Utils = require("./utils");
 
 module.exports = {
   Query: {
-    // -----   C I T Y   -----
+    // -----   C A T E G O R Y   -----
+    category: async (_, args, { token }) => {
+      const category = await Category.findOne({_id: args._id});
+      return Utils.factorCategory.unit(category);
+    },
+    categories: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.categoryTitle) { where.categoryTitle = new RegExp(args.title, 'i'); }
 
+      let cates = await Category.find(where).skip(offset).limit(limit);
+      return Utils.factorCategory.array(cates);
+    },
+
+    // -----   C I T Y   -----
     cities: async (_, args, { token }) => {
       // Utils.checkToken(token); //console.log(decoded);
       let where = {};
@@ -129,7 +144,38 @@ module.exports = {
 
   Mutation: {
     // -----   C I T Y   -----
+    addCategory: async (_, args, { token }) => {
+      const duplicated = await Category.findOne({categoryTitle: args.categoryTitle});
+      if (!!duplicated) { return {status: 'Error', message: 'Title already exists', content: {}}; }
 
+      let category = { _id: new mongoose.mongo.ObjectId(), categoryTitle: args.categoryTitle };
+      const created = await Category.create(category);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.factorCategory.unit(created)}; }
+      else { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+    },
+    updateCategory: async (_, args, { token }) => {
+      let updateData = await Category.findOne({_id: args._id});
+      if (!updateData) { return {status: "Error", message: 'Data not found', content: {}}; }
+
+      let exists = await Category.findOne({categoryTitle: args.categoryTitle});
+      if (exists && updateData._id.equals(exists._id)) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.factorCategory.unit(exists)} }
+      if (exists && !updateData._id.equals(exists._id)) { return {status: 'Error', message: 'Data duplicated', content: {}}; }
+
+      const updated = await Category.findOneAndUpdate({_id: args._id}, {categoryTitle: args.categoryTitle}, {returnOriginal: false});
+      if (!!updated) { return {status: 'Success', message: 'Data updated successfully', content: Utils.factorCategory.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data', content: {}}; }
+    },
+    deleteCategory: async (_, args, { token }) => {
+      try {
+        const deleted = await Category.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+      }
+      catch (e) {
+        return {status: 'Error', message: 'Something went wrong', content: {}};
+      }
+    },
+
+    // -----   C I T Y   -----
     addCity: async (_, args, { token }) => {
       // check duplication
       const whereDup = {

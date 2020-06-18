@@ -17,6 +17,25 @@ const checkOptionalRequired = (data, members) => {
     });
 }
 
+
+/**
+ *   ---   C A T E G O R Y   ---
+ * */ 
+
+ const factorCategory = cate => {
+     return !!cate ? { _id: cate._id, categoryTitle: cate.categoryTitle } : null;
+ }
+
+ const factorCategories = cates => {
+     return !!cates && cates.length > 0 ? (cates.map(cate => factorCategory(cate))) : [];
+ }
+
+const checkCategoryDuplicate = async where => {
+    const category = await Category.findOne(where);
+    return !!category;
+}
+
+
 const factorCity = data => {
     return data._id !== undefined ? { _id: data._id, code: data.code, cityName: data.cityName } : null;
 }
@@ -112,6 +131,7 @@ const factorSMTArray = smts => {
 
 module.exports = {
     checkDuplicate: {
+        category: checkCategoryDuplicate,
         district: checkDistrictDuplicated,
         role: checkRoleDuplicated,
         roleAuthority: checkRoleAuthorityDuplicated,
@@ -140,5 +160,9 @@ module.exports = {
     factorSMT: {
         unit: factorSMT,
         array: factorSMTArray,
+    },
+    factorCategory: {
+        unit: factorCategory,
+        array: factorCategories,
     }
 }

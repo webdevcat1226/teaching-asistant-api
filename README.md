@@ -35,8 +35,25 @@ prefer using <b>lowerCamelCase</b>.
  includes city, district, role
 
 ## Change log
+- 2020-06-18: exam added
+- 2020-06-18: Exam Sets added
 
 
 ## To-dos
 
+- Book Test Answers
+- Book Tests
+- Book Unit Sub Topics
+- Book Unit Topics
+- Book Units
+- Books
+
+- Exam Set Test Answers
+- Exam Set Tests
+
+- Lessons
+- Score Calculator
+- Sub Topics
+- Teachers
+- Topics
 

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const Exam = require("./models/exam.model");
+const ExamSet = require('./models/examSet.model');
 
 const Utils = require("./utils");
 
@@ -25,9 +26,30 @@ module.exports = {
       const exam = await Exam.findOne({ _id: args._id });
       return Utils.exam.factor.unit(exam);
     },
+    
+    // -----   E X A M    S E T   -----
+    examSet: async (_, args, { token }) => {
+      const es = await ExamSet.findOne({_id: args._id});
+      return Utils.examSet.factor.unit(es);
+    },
+    examSets: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.examId) { where.examId = args.examId; }
+      if (!!args.categoryId) { where.categoryId = args.categoryId; }
+      if (!!args.publisherId) { where.publisherId = args.publisherId; }
+      if (!!args.publishYear) { where.publishYear = args.publishYear; }
+      //if (!!args.isbn) { where.isbn = args.isbn; }
+      if (args.showToUsers !== undefined) { where.showToUsers = args.showToUsers; }
+      if (!!args.level) { where.level = args.level; }
+      let ess = await ExamSet.find(where).skip(offset).limit(limit);
+      return Utils.examSet.factor.array(ess);
+    },
+
   },
 
-  
+
   Mutation: {
     // -----   E X A M   -----
     addExam: async (_, args, { token }) => {
@@ -75,6 +97,60 @@ module.exports = {
         }
       } else {
         return { status: 'Error', message: 'Failed to delete data...', content: {} };
+      }
+    },
+    
+    // -----   E X A M    S E T   -----
+    addExamSet: async (_, args, { token }) => {
+      const duplicated = await Utils.examSet.checkDuplicate({ examId: args.examId, categoryId: args.categoryId, title: args.title, publisherId: args.publisherId, publishYear: args.publishYear });
+      if (duplicated) { return {status: 'Error', message: 'Same exam set already exists', content: {}}; }
+
+      let es = {
+        _id: new mongoose.mongo.ObjectId(),
+        examId: args.examId,
+        categoryId: args.categoryId,
+        title: args.title,
+        publisherId: args.publisherId,
+        publishYear: args.publishYear,
+        isbn: args.isbn || "",
+        level: args.level || "",
+        showToUsers: args.showToUsers || false,
+        image: args.image || "" 
+      };
+      const created = await ExamSet.create(es);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.examSet.factor.unit(created)};}
+      else { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+    },
+    updateExamSet: async (_, args, { token }) => {
+      let updateData = await ExamSet.findOne({_id: args._id});
+      if (!updateData) { return {status: 'Error', message: 'Data not found', content: {}} }
+
+      
+      const updateFlds = ['examId', 'categoryId', 'title', 'publisherId', 'publishYear', 'isbn', 'level', 'showToUsers', 'image'];
+      const reqFlds = ['examId', 'categoryId', 'title', 'publisherId', 'publishYear'];
+      let reqWhere = {};
+
+      for (let fld of reqFlds) {
+        reqWhere[fld] = args[fld] || updateData[fld];
+      }
+      for (let fld of updateFlds) {
+        if (args[fld] !== undefined) { updateData[fld] = args[fld]; }
+      }
+
+      const exists = await ExamSet.findOne(reqWhere);
+      if (!!exists && !exists._id.equals(updateData._id)) { return {status: 'Success', message: 'Duplicated data', content: {}}; }
+
+      const updated = await ExamSet.findOneAndUpdate({_id: args._id}, updateData, {returnOriginal: false});
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.examSet.factor.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+    },
+    deleteExamSet: async (_, args, { token }) => {
+      try {
+        const deleted = await ExamSet.deleteOne({_id: args._id});
+        if (!!deleted) { return {status: 'Success', message: 'Data has been deleted', content: deleted}; }
+        else { return {status: 'Error', message: 'Failed to delete data', content: {}}; }
+      } catch (e) {
+        return {status: 'Error', message: 'Failed to delete data', content: {}};
       }
     },
   }
