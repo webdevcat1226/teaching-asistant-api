@@ -1,6 +1,8 @@
 const Exam = require('./models/exam.model');
 const ExamSet = require('./models/examSet.model');
 const Lesson = require('./models/lesson.model');
+const Subtopic = require('./models/subtopic.model');
+const Topic = require('./models/topic.model');
 
 // -----   E X A M   -----
 
@@ -59,6 +61,18 @@ const checkTopicDuplicated = async where => {
     return !!topic;
 }
 
+// -----   S U B T O P I C   -----
+const factorSubtopic = st => {
+    return !!st ? {_id: st._id, topicId: st.topicId, title: st.title} : null;
+}
+const factorSubtopics = sts => {
+    return !!sts && sts.length > 0 ? (sts.map(st=>factorSubtopic(st))) : [];
+}
+const checkSubtopicDuplicated = async where => {
+    const subtopic = await Subtopic.findOne(where);
+    return !!subtopic;
+}
+
 
 
 module.exports = {
@@ -82,6 +96,13 @@ module.exports = {
             array: factorLessons,
         },
         checkDuplicate: checkLessonDuplicate,
+    },
+    subtopic: {
+        factor: {
+            unit: factorSubtopic,
+            array: factorSubtopics,
+        },
+        checkDuplicate: checkSubtopicDuplicated,
     },
     topic: {
         factor: {

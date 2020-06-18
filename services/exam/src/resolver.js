@@ -6,6 +6,7 @@ require('dotenv').config();
 const Exam = require("./models/exam.model");
 const ExamSet = require('./models/examSet.model');
 const Lesson = require('./models/lesson.model');
+const Subtopic = require('./models/subtopic.model');
 const Topic = require('./models/topic.model');
 
 const Utils = require("./utils");
@@ -61,6 +62,22 @@ module.exports = {
       if (!!args.title) { where.title = new RegExp(args.title, 'i'); }
       let lessons = await Lesson.find(where).skip(offset).limit(limit);
       return Utils.lesson.factor.array(lessons);
+    },
+
+    // -----   S U B T O P I C   -----
+    subtopic: async (_, args, { token }) => {
+      const subtopic = await Subtopic.findOne({_id: args._id});
+      return Utils.subtopic.factor.unit(subtopic);
+    },
+    subtopics: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.topicId) { where.topicId = args.topicId; }
+      if (!!args.title) { where.title = new RegExp(args.title, 'i'); }
+
+      let subtopics = await Subtopic.find(where).skip(offset).limit(limit);
+      return Utils.subtopic.factor.array(subtopics);
     },
 
     // -----   T O P I C   -----
@@ -210,6 +227,39 @@ module.exports = {
       try {
         const deleted = await Lesson.deleteOne({_id: args._id});
         return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+      }
+      catch (e) {
+        return {status: 'Error', message: 'Something went wrong', content: {}};
+      }
+    },
+
+    // -----   S U B T O P I C   -----
+    addSubtopic: async (_, args, { token }) => {
+      const duplicated = await Utils.subtopic.checkDuplicate({topicId: args.topicId, title: args.title});
+      if (!!duplicated) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      const subtopic = {_id: new mongoose.mongo.ObjectId(), topicId: args.topicId, title: args.title};
+      const created = await Subtopic.create(subtopic);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.subtopic.factor.unit(created)}; }
+      else { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+    },
+    updateSubtopic: async (_, args, { token }) => {
+      let updateData = await Subtopic.findOne({_id: args._id});
+      if (!updateData) { return {status: 'Error', message: 'No data found', content: {}}; }
+
+      let exists = await Subtopic.findOne({topicId: args.topicId || updateData.topicId, title: args.title || updateData.title, _id: {$ne: args._id}});
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      if (!!args.topicId) {updateData.topicId = args.topicId;}
+      if (!!args.title) { updateData.title = args.title; }
+      const updated = await Subtopic.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.subtopic.factor.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data', content: {}}; }
+    },
+    deleteSubtopic: async (_, args, { token }) => {
+      try {
+        const deleted = await Subtopic.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data had been deleted successfully', content: deleted};
       }
       catch (e) {
         return {status: 'Error', message: 'Something went wrong', content: {}};

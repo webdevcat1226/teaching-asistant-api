@@ -29,6 +29,12 @@ module.exports = gql`
         title: String!
     }
 
+    type Subtopic @key(fields: "_id") {
+        _id: ID!,
+        topicId: String,
+        title: String,
+    }
+
     type Topic @key(fields: "_id") {
         _id: ID!
         lessonId: String
@@ -47,6 +53,10 @@ module.exports = gql`
         # -----   L E S S O N   -----
         lesson(_id: ID!): Lesson
         lessons(title: String, offset: Int, limit: Int): [Lesson]!
+
+        # -----   S U B T O P I C   -----
+        subtopic(_id: ID!): Subtopic
+        subtopics(topicId: ID, title: String, offset: Int, limit: Int): [Subtopic]!
 
         # -----   T O P I C   -----
         topic(_id: ID!): Topic
@@ -74,6 +84,11 @@ module.exports = gql`
         addTopic(lessonId: String!, title: String!): ExamResponse!
         updateTopic(_id: ID!, lessonId: String, title: String): ExamResponse!
         deleteTopic(_id: ID!): ExamResponse!
+
+        # -----   S U B T O P I C   -----
+        addSubtopic(topicId: ID!, title: String!): ExamResponse!
+        updateSubtopic(_id: ID!, topicId: String, title: String): ExamResponse!
+        deleteSubtopic(_id: ID!): ExamResponse!
     }
 
     type ExamResponse {

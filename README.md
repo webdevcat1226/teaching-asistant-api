@@ -35,6 +35,7 @@ prefer using <b>lowerCamelCase</b>.
  includes city, district, role
 
 ## Change log
+- Teachers
 - 2020-06-18: exam added
 - 2020-06-18: Exam Sets added
 - 2020-06-18 Lessons crud
@@ -56,5 +57,4 @@ prefer using <b>lowerCamelCase</b>.
 
 - Score Calculator
 - Sub Topics
-- Teachers
 
