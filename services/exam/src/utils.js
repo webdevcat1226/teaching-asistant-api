@@ -1,6 +1,6 @@
 const Exam = require('./models/exam.model');
 const ExamSet = require('./models/examSet.model');
-
+const Lesson = require('./models/lesson.model');
 
 // -----   E X A M   -----
 
@@ -31,6 +31,20 @@ const checkExamSetDup = async where => {
     return !!examSet;
 }
 
+// -----   L E S S O N   -----
+const factorLesson = ls => {
+    return !!ls ? {_id: ls._id, title: ls.title} : null;
+}
+
+const factorLessons = lss => {
+    return !!lss && lss.length > 0 ? (lss.map(ls => factorLesson(ls))) : [];
+}
+
+const checkLessonDuplicate = async where => {
+    const lesson = await Lesson.findOne(where);
+    return !!lesson;
+}
+
 module.exports = {
     exam: {
         factor: {
@@ -45,5 +59,12 @@ module.exports = {
             array: factorExamSets,
         },
         checkDuplicate: checkExamSetDup,
+    },
+    lesson: {
+        factor: {
+            unit: factorLesson,
+            array: factorLessons,
+        },
+        checkDuplicate: checkLessonDuplicate,
     }
 }

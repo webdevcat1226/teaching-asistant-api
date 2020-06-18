@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const Exam = require("./models/exam.model");
 const ExamSet = require('./models/examSet.model');
+const Lesson = require('./models/lesson.model');
 
 const Utils = require("./utils");
 
@@ -47,6 +48,19 @@ module.exports = {
       return Utils.examSet.factor.array(ess);
     },
 
+    // -----   L E S S O N   -----
+    lesson: async (_, args, { token }) => {
+      const lesson = await Lesson.findOne({_id: args._id});
+      return Utils.lesson.factor.unit(lesson);
+    },
+    lessons: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.title) { where.title = new RegExp(args.title, 'i'); }
+      let lessons = await Lesson.find(where).skip(offset).limit(limit);
+      return Utils.lesson.factor.array(lessons);
+    },
   },
 
 
@@ -151,6 +165,36 @@ module.exports = {
         else { return {status: 'Error', message: 'Failed to delete data', content: {}}; }
       } catch (e) {
         return {status: 'Error', message: 'Failed to delete data', content: {}};
+      }
+    },
+
+    // -----   L E S S O N   -----
+    addLesson: async (_, args, { token }) => {
+      const duplicated = await Utils.lesson.checkDuplicate({title: args.title});
+      if (!!duplicated) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      let lesson = {_id: new mongoose.mongo.ObjectId(), title: args.title};
+      const created = await Lesson.create(lesson);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.lesson.factor.unit(created)}; }
+      else { return { status: 'Error', message: 'Failed to add data', content: {} }; }
+    },
+    updateLesson: async (_, args, { token }) => {
+      const updateData = await Lesson.findOne({_id: args._id});
+      if (!updateData) { return {status: 'Error', message: 'No data found', content: {}}; }
+      const exists = await Lesson.findOne({title: args.title, _id: {$ne: args._id}});
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      const updated = await Lesson.findOneAndUpdate({_id: args._id}, {title: args.title}, {returnOriginal: false});
+      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.lesson.factor.unit(updated)}; }
+      else { return {status: 'Error', message: 'Failed to update data', content: {}}; }
+    },
+    deleteLesson: async (_, args, { token }) => {
+      try {
+        const deleted = await Lesson.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+      }
+      catch (e) {
+        return {status: 'Error', message: 'Something went wrong', content: {}};
       }
     },
   }
