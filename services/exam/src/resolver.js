@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const Exam = require("./models/exam.model");
 const ExamSet = require('./models/examSet.model');
+const ExamSetBookie = require('./models/examSetBookie.model');
 const Lesson = require('./models/lesson.model');
 const Subtopic = require('./models/subtopic.model');
 const Topic = require('./models/topic.model');
@@ -48,6 +49,21 @@ module.exports = {
       if (!!args.level) { where.level = args.level; }
       let ess = await ExamSet.find(where).skip(offset).limit(limit);
       return Utils.examSet.factor.array(ess);
+    },
+
+    // -----   EXAM SET BOOKIE   -----
+    examSetBookie: async (_, args, { token }) => {
+      const esb = await ExamSetBookie.findOne({_id: args._id});
+      return Utils.examSetBookie.factor.unit(esb);
+    },
+    examSetBookies: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.examSetId) {where.examSetId = args.examSetId;}
+      if (!!args.bookieTitle) {where.bookieTitle = args.bookieTitle;}
+      const esbs = await ExamSetBookie.find(where).skip(offset).limit(limit);
+      return Utils.examSetBookie.factor.array(esbs);
     },
 
     // -----   L E S S O N   -----
@@ -200,6 +216,39 @@ module.exports = {
         else { return {status: 'Error', message: 'Failed to delete data', content: {}}; }
       } catch (e) {
         return {status: 'Error', message: 'Failed to delete data', content: {}};
+      }
+    },
+
+    // -----   EXAM SET BOOKIE   -----
+    addExamSetBookie: async (_, args, { token }) => {
+      const duplicated = await Utils.examSetBookie.checkDuplicated({examSetId: args.examSetId, bookieTitle: args.bookieTitle});
+      if (!!duplicated) { return {status: 'Error', message: 'Data already exists', content: {}}; }
+      const esb = {_id: new mongoose.mongo.ObjectId(), examSetId: args.examSetId, bookieTitle: args.bookieTitle};
+      const created = await ExamSetBookie.create(esb);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.examSetBookie.factor.unit(created)};}
+      else {return {status: 'Error', message: 'Failed to add data', content: {}};}
+    },
+    updateExamSetBookie: async (_, args, { token }) => {
+      let updateData = await ExamSetBookie.findOne({_id: args._id});
+      if (!updateData) { return {status: 'Error', message: 'No data found', content: {}}; }
+      
+      const exists = await ExamSetBookie.findOne({_id: {$ne: args._id}, examSetId: args.examSetId || updateData.examSetId, bookieTitle: args.bookieTitle || updateData.bookieTitle});console.log('hi')
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+      console.log('hi')
+      // patch update data
+      if (!!args.examSetId) {updateData.examSetId = args.examSetId;}
+      if (!!args.bookieTitle) {updateData.bookieTitle = args.bookieTitle;}
+
+      const updated = await ExamSetBookie.findOneAndUpdate({_id: args._id}, updateData, {returnOriginal: false});
+      if (!!updated) {return {status: 'Success', message: 'Data has been updated successfully', content: Utils.examSetBookie.factor.unit(updated)};}
+      else {return {status: 'Error', message: 'Failed to update data', content:{}};}
+    },
+    deleteExamSetBookie: async (_, args, { token }) => {
+      try {
+        const deleted = await ExamSetBookie.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data has been deleted', content: deleted};
+      } catch (e) {
+        return {status: 'Error', message: 'Something went wrong', content: {}};
       }
     },
 

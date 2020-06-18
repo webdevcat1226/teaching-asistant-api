@@ -24,6 +24,12 @@ module.exports = gql`
         image: String,
     }
 
+    type ExamSetBookie @key(fields: "_id") {
+        _id: ID!,
+        examSetId: String,
+        bookieTitle: String,
+    }
+
     type Lesson @key(fields: "_id") {
         _id: ID!
         title: String!
@@ -50,6 +56,10 @@ module.exports = gql`
         examSet(_id: ID!): ExamSet
         examSets(examId: String, categoryId: String, publisherId: String, publishYear: Int, level: EXAMSET_LEVEL, showToUsers: Boolean, offset: Int, limit: Int): [ExamSet]!
 
+        # -----   Exam Set Bookie   -----
+        examSetBookie(_id: ID!): ExamSetBookie
+        examSetBookies(examSetId: ID, bookieTitle: String, offset: Int, limit: Int): [ExamSetBookie]!
+
         # -----   L E S S O N   -----
         lesson(_id: ID!): Lesson
         lessons(title: String, offset: Int, limit: Int): [Lesson]!
@@ -61,7 +71,6 @@ module.exports = gql`
         # -----   T O P I C   -----
         topic(_id: ID!): Topic
         topics(lessonId: String, title: String, offset: Int, limit: Int):[Topic]!
-
     }
 
     type Mutation {
@@ -74,6 +83,11 @@ module.exports = gql`
         addExamSet(examId: String!, categoryId: String!, title: String!, publisherId: String!, publishYear: Int!, isbn: String, level: EXAMSET_LEVEL, showToUsers: Boolean, image: String): ExamResponse!
         updateExamSet(_id: ID!, examId: String, categoryId: String, title: String, publisherId: String, publishYear: Int, isbn: String, level: EXAMSET_LEVEL, showToUsers: Boolean, image: String): ExamResponse!
         deleteExamSet(_id: ID!): ExamResponse!
+
+        # -----   Exam Set Bookie   -----
+        addExamSetBookie(examSetId: String!, bookieTitle: String!): ExamResponse!
+        updateExamSetBookie(_id: ID!, examSetId: String, bookieTitle: String): ExamResponse!
+        deleteExamSetBookie(_id: ID!): ExamResponse!
 
         # -----   L E S S O N   -----
         addLesson(title: String!): ExamResponse!

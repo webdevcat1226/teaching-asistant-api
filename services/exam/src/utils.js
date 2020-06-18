@@ -1,5 +1,6 @@
 const Exam = require('./models/exam.model');
 const ExamSet = require('./models/examSet.model');
+const ExamSetBookie = require('./models/examSetBookie.model');
 const Lesson = require('./models/lesson.model');
 const Subtopic = require('./models/subtopic.model');
 const Topic = require('./models/topic.model');
@@ -32,6 +33,20 @@ const checkExamSetDup = async where => {
     const examSet = await ExamSet.findOne(where);
     return !!examSet;
 }
+
+// -----   EXAM SET BOOKIE   -----
+const factorESBookie = esb => {
+    return !!esb ? {_id: esb._id, examSetId: esb.examSetId || "", bookieTitle: esb.bookieTitle} : null;
+}
+const factorESBookies = esbs => {
+    return !!esbs && esbs.length > 0 ? (esbs.map(esb=>factorESBookie(esb))) : [];
+}
+const checkESBDuplicated = async where => {
+    const esb = await ExamSetBookie.findOne(where);
+    return !!esb;
+}
+
+
 
 // -----   L E S S O N   -----
 const factorLesson = ls => {
@@ -89,6 +104,13 @@ module.exports = {
             array: factorExamSets,
         },
         checkDuplicate: checkExamSetDup,
+    },
+    examSetBookie: {
+        factor: {
+            unit: factorESBookie,
+            array: factorESBookies,
+        },
+        checkDuplicated: checkESBDuplicated,
     },
     lesson: {
         factor: {
