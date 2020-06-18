@@ -37,6 +37,8 @@ prefer using <b>lowerCamelCase</b>.
 ## Change log
 - 2020-06-18: exam added
 - 2020-06-18: Exam Sets added
+- 2020-06-18 Lessons crud
+
 
 
 ## To-dos
@@ -51,7 +53,6 @@ prefer using <b>lowerCamelCase</b>.
 - Exam Set Test Answers
 - Exam Set Tests
 
-- Lessons
 - Score Calculator
 - Sub Topics
 - Teachers

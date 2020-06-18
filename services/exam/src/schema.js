@@ -29,6 +29,12 @@ module.exports = gql`
         title: String!
     }
 
+    type Topic @key(fields: "_id") {
+        _id: ID!
+        lessonId: String
+        title: String
+    }
+
     type Query {
         # -----   E X A M   -----
         exam(_id: ID!): Exam!
@@ -39,8 +45,12 @@ module.exports = gql`
         examSets(examId: String, categoryId: String, publisherId: String, publishYear: Int, level: EXAMSET_LEVEL, showToUsers: Boolean, offset: Int, limit: Int): [ExamSet]!
 
         # -----   L E S S O N   -----
-        lesson(_id: ID): Lesson
+        lesson(_id: ID!): Lesson
         lessons(title: String, offset: Int, limit: Int): [Lesson]!
+
+        # -----   T O P I C   -----
+        topic(_id: ID!): Topic
+        topics(lessonId: String, title: String, offset: Int, limit: Int):[Topic]!
 
     }
 
@@ -59,6 +69,11 @@ module.exports = gql`
         addLesson(title: String!): ExamResponse!
         updateLesson(_id: ID!, title: String!): ExamResponse!
         deleteLesson(_id: ID!): ExamResponse!
+
+        # -----   T O P I C   -----
+        addTopic(lessonId: String!, title: String!): ExamResponse!
+        updateTopic(_id: ID!, lessonId: String, title: String): ExamResponse!
+        deleteTopic(_id: ID!): ExamResponse!
     }
 
     type ExamResponse {

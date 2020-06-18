@@ -45,6 +45,22 @@ const checkLessonDuplicate = async where => {
     return !!lesson;
 }
 
+// -----   T O P I C   -----
+const factorTopic = tp => {
+    return !!tp ? {_id: tp._id, lessonId: tp.lessonId, title: tp.title} : null;
+}
+
+const factorTopics = tps => {
+    return !!tps && tps.length > 0 ? (tps.map(tp => factorTopic(tp))) : [];
+}
+
+const checkTopicDuplicated = async where => {
+    const topic = await Topic.findOne(where);
+    return !!topic;
+}
+
+
+
 module.exports = {
     exam: {
         factor: {
@@ -66,5 +82,12 @@ module.exports = {
             array: factorLessons,
         },
         checkDuplicate: checkLessonDuplicate,
+    },
+    topic: {
+        factor: {
+            unit: factorTopic,
+            array: factorTopics,
+        },
+        checkDuplicate: checkTopicDuplicated
     }
 }

@@ -6,6 +6,7 @@ require('dotenv').config();
 const Exam = require("./models/exam.model");
 const ExamSet = require('./models/examSet.model');
 const Lesson = require('./models/lesson.model');
+const Topic = require('./models/topic.model');
 
 const Utils = require("./utils");
 
@@ -61,6 +62,23 @@ module.exports = {
       let lessons = await Lesson.find(where).skip(offset).limit(limit);
       return Utils.lesson.factor.array(lessons);
     },
+
+    // -----   T O P I C   -----
+    topic: async (_, args, { token }) => {
+      const topic = await Topic.findOne({_id: args._id});
+      return Utils.topic.factor.unit(topic);
+    },
+    topics: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.lessonId) { where.lessonId = args.lessonId; }
+      if (!!args.title) { where.title = new RegExp(args.title, 'i'); }
+
+      let topics = await Topic.find(where).skip(offset).limit(limit);
+      return Utils.topic.factor.array(topics);
+    },
+
   },
 
 
@@ -194,6 +212,39 @@ module.exports = {
         return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
       }
       catch (e) {
+        return {status: 'Error', message: 'Something went wrong', content: {}};
+      }
+    },
+
+    // -----   T O P I C   -----
+    addTopic: async (_, args, { token }) => {
+      const duplicated = await Topic.findOne({lessonId: args.lessonId, title: args.title});
+      if (!!duplicated) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      const topic = { _id: new mongoose.mongo.ObjectId(), lessonId: args.lessonId, title: args.title };
+
+      const created = await Topic.create(topic);
+      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.topic.factor.unit(created)}; }
+      else { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+    },
+    updateTopic: async (_, args, { token }) => {
+      let updateData = await Topic.findOne({_id: args._id});
+      if (!updateData) {return {status: 'Error', message: 'No data found', content: {}};}
+
+      const exists = await Topic.findOne({lessonId: args.lessonId, title: args.title, _id: {$ne: args._id}});
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      if (!!args.lessonId) {updateData.lessonId = args.lessonId;}
+      if (!!args.title) {updateData.title = args.title;}
+      const updated = await Topic.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      if (!!updated) {return {status: 'Success', message: 'Data has been updated successfully', content: Utils.topic.factor.unit(updated)};}
+      else {return {status: 'Error', message: 'Failed to update data', content: {}};}
+    },
+    deleteTopic: async (_, args, { token }) => {
+      try {
+        const deleted = await Topic.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Topic deleted successfully', content: deleted};
+      } catch (e) {
         return {status: 'Error', message: 'Something went wrong', content: {}};
       }
     },
