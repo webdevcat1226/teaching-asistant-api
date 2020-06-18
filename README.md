@@ -38,6 +38,7 @@ prefer using <b>lowerCamelCase</b>.
 - 2020-06-18: exam added
 - 2020-06-18: Exam Sets added
 - 2020-06-18 Lessons crud
+- 2020-06-18 Topics
 
 
 
@@ -56,5 +57,4 @@ prefer using <b>lowerCamelCase</b>.
 - Score Calculator
 - Sub Topics
 - Teachers
-- Topics
 
