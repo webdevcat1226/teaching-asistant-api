@@ -1,6 +1,8 @@
 const Exam = require('./models/exam.model');
+const ExamAnswer = require('./models/examAnswer.model');
 const ExamSet = require('./models/examSet.model');
 const ExamSetBookie = require('./models/examSetBookie.model');
+const ExamTest = require('./models/examTest.model');
 const Lesson = require('./models/lesson.model');
 const Subtopic = require('./models/subtopic.model');
 const Topic = require('./models/topic.model');
@@ -19,6 +21,19 @@ const checkExamDup = async where => {
     const exam = await Exam.findOne(where);
     return !!exam;
 }
+
+// -----   E X A M   -----
+const factorExamAnswer = ea => {
+    return !!ea ? {_id: ea._id, examSetTestId: ea.examSetTestId, questionNumber: ea.questionNumber, correctAnswer: ea.correctAnswer} : null;
+}
+const factorExamAnswers = eas => {
+    return !!eas && eas.length > 0 ? (eas.map(ea => factorExamAnswer(ea))) : [];
+}
+const checkExamAnswerDuplicated = async where => {
+    const ea = await ExamAnswer.findOne(where);
+    return !!ea;
+}
+
 
 // -----   E X A M    S E T   -----
 const factorExamSet = examSet=> {
@@ -46,6 +61,17 @@ const checkESBDuplicated = async where => {
     return !!esb;
 }
 
+// -----   EXAM TEST   -----
+const factorExamTest = et => {
+    return !!et ? {_id: et._id, examSetBookieId: et.examSetBookieId, title: et.title, sequence: et.sequence, questionCount: et.questionCount} : null;
+}
+const factorExamTests = ets => {
+    return !!ets && ets.length > 0 ? (ets.map(et => factorExamTest(et))) : [];
+}
+const checkExamTestDuplicate = async where => {
+    const et = await ExamTest.findOne(where);
+    return !!et;
+}
 
 
 // -----   L E S S O N   -----
@@ -98,6 +124,13 @@ module.exports = {
         },
         checkDuplicate: checkExamDup,
     },
+    examAnswer: {
+        factor: {
+            unit: factorExamAnswer,
+            array: factorExamAnswers,
+        },
+        checkDuplicated: checkExamAnswerDuplicated
+    },
     examSet: {
         factor: {
             unit: factorExamSet,
@@ -111,6 +144,13 @@ module.exports = {
             array: factorESBookies,
         },
         checkDuplicated: checkESBDuplicated,
+    },
+    examTest: {
+        factor: {
+            unit: factorExamTest,
+            array: factorExamTests,
+        },
+        checkDuplicated: checkExamTestDuplicate,
     },
     lesson: {
         factor: {

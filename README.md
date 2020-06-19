@@ -41,20 +41,22 @@ prefer using <b>lowerCamelCase</b>.
 - 2020-06-18 Lessons crud
 - 2020-06-18 Topics
 - 2020-06-19 Sub Topics
-
+- Exam Set Tests
+- Exam Set Test Answers
+- Books
+- Book Units
+- Book Unit Topics
+- Book Unit Sub Topics
+- Book Tests
+- Book Test Answers
 
 
 ## To-dos
 
-- Book Test Answers
-- Book Tests
-- Book Unit Sub Topics
-- Book Unit Topics
-- Book Units
-- Books
+### Admin panel
+- simple CRUDs
+-
 
-- Exam Set Test Answers
-- Exam Set Tests
 
 - Score Calculator
 

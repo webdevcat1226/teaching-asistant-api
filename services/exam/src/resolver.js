@@ -4,8 +4,10 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const Exam = require("./models/exam.model");
+const ExamAnswer = require('./models/examAnswer.model');
 const ExamSet = require('./models/examSet.model');
 const ExamSetBookie = require('./models/examSetBookie.model');
+const ExamTest = require('./models/examTest.model');
 const Lesson = require('./models/lesson.model');
 const Subtopic = require('./models/subtopic.model');
 const Topic = require('./models/topic.model');
@@ -31,6 +33,24 @@ module.exports = {
       return Utils.exam.factor.unit(exam);
     },
     
+    // -----   E X A M    A N S W E R   -----
+    examAnswer: async (_, args, { token }) => {
+      const ea = await ExamAnswer.findOne({_id: args._id});
+      return Utils.examAnswer.factor.unit(ea);
+    },
+    examAnswers: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.examSetTestId) {where.examSetTestId = args.examSetTestId;}
+      if (!!args.subTopicId) {where.subTopicId = args.subTopicId;}
+      if (!!args.questionNumber) {where.questionNumber = args.questionNumber;}
+      if (!!args.correctAnswer) {where.correctAnswer = args.correctAnswer;}
+
+      const eas = await ExamAnswer.find(where).skip(offset).limit(limit);
+      return Utils.examAnswer.factor.array(eas);
+    },
+
     // -----   E X A M    S E T   -----
     examSet: async (_, args, { token }) => {
       const es = await ExamSet.findOne({_id: args._id});
@@ -64,6 +84,24 @@ module.exports = {
       if (!!args.bookieTitle) {where.bookieTitle = args.bookieTitle;}
       const esbs = await ExamSetBookie.find(where).skip(offset).limit(limit);
       return Utils.examSetBookie.factor.array(esbs);
+    },
+
+    // -----   EXAM TEST   -----
+    examTest: async (_, args, { token }) => {
+      const et = await ExamTest.findOne({_id: args._id});
+      return Utils.examTest.factor.unit(et);
+    },
+    examTests: async (_, args, { token }) => {
+      const offset = !!args.offset ? args.offset : 0;
+      const limit = !!args.limit ? args.limit : 0;
+      let where = {};
+      if (!!args.examSetBookieId) {where.examSetBookieId = args.examSetBookieId;}
+      if (!!args.title) {where.title = new RegExp(args.title, 'i');}
+      if (!!args.sequence) {where.sequence = args.sequence;}
+      if (!!args.questionCount) {where.questionCount = args.questionCount; }
+
+      let ets = await ExamTest.find(where).skip(offset).limit(limit);
+      return Utils.examTest.factor.array(ets);
     },
 
     // -----   L E S S O N   -----
@@ -165,6 +203,52 @@ module.exports = {
       }
     },
     
+    // -----   E X A M    A N S W E R   -----
+    addExamAnswer: async (_, args, { token }) => {
+      const duplicated = await Utils.examAnswer.checkDuplicated({examSetTestId: args.examSetTestId, subTopicId: args.subTopicId,  questionNumber: args.questionNumber});
+      if (!!duplicated) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+
+      const examAnswer = {
+        _id: new mongoose.mongo.ObjectId(),
+        examSetTestId: args.examSetTestId,
+        subTopicId: args.subTopicId,
+        questionNumber: args.questionNumber,
+        correctAnswer: args.correctAnswer,
+      };
+      const created = await ExamAnswer.create(examAnswer);
+      if (!!created) {return {status: 'Success', message: 'Data has been added successfully', content: Utils.examAnswer.factor.unit(created)};}
+      else {return {status: 'Error', message: 'Failed to add data', content: {}};}
+    },
+    updateExamAnswer: async (_, args, { token }) => {
+      // check existence
+      let updateData = await ExamAnswer.findOne({_id: args._id});
+      if (!updateData) { return {status: 'Error', message: 'No data found', content: {}}; }
+
+      // check duplicate
+      const exists = await ExamAnswer.findOne({
+        _id: {$ne: args},
+        examSetTestId: args.examSetTestId || updateData.examSetTestId,
+        subTopicId: args.subTopicId || updateData.subTopicId,
+        questionNumber: args.questionNumber || updateData.questionNumber,
+      });
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: {}}; }
+      // patch data to update
+      if (!!args.examSetTestId) {updateData.examSetTestId = args.examSetTestId;}
+      if (!!args.subTopicId) {updateData.subTopicId = args.subTopicId;}
+      if (!!args.questionNumber) {updateData.questionNumber = args.questionNumber;}
+      if (!!args.correctAnswer) {updateData.correctAnswer = args.correctAnswer;}
+
+      const updated = await ExamAnswer.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      if (!!updated) {return {status: 'Success', message: 'Data has been updated', content: Utils.examAnswer.factor.unit(updated)};}
+      else {return {status: 'Error', message: 'Failed to update data', content: {}};}
+    },
+    deleteExamAnswer: async (_, args, { token }) => {
+      try {
+        const deleted = await ExamAnswer.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data deleted been deleted', content: deleted};
+      } catch (e) {return {status: 'Error', message: 'Failed to update data', content: {}};}
+    },
+
     // -----   E X A M    S E T   -----
     addExamSet: async (_, args, { token }) => {
       const duplicated = await Utils.examSet.checkDuplicate({ examId: args.examId, categoryId: args.categoryId, title: args.title, publisherId: args.publisherId, publishYear: args.publishYear });
@@ -250,6 +334,49 @@ module.exports = {
       } catch (e) {
         return {status: 'Error', message: 'Something went wrong', content: {}};
       }
+    },
+
+    // -----   EXAM TEST   -----
+    addExamTest: async (_, args, { token }) => {
+      const duplicate = await Utils.examTest.checkDuplicated({examSetBookieId: args.examSetBookieId, title: args.title});
+      if (!!duplicate) {return {status: 'Error', message: 'Duplicated data', content: {}};}
+
+      const et = {
+        _id: new mongoose.mongo.ObjectId(),
+        examSetBookieId: args.examSetBookieId,
+        title: args.title,
+        sequence: args.sequence || 0,
+        questionCount: args.questionCount || 0,
+      };
+      const created = await ExamTest.create(et);
+      if (!!created) {return {status: 'Scuccess', message: 'Data has been added successfully', content: Utils.examTest.factor.unit(created)};}
+      else { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+    },
+    updateExamTest: async (_, args, { token }) => {
+      let updateData = await ExamTest.findOne({_id: args._id});
+      if (!updateData) {return {status: 'Error', message: 'No data found', content: {}};}
+
+      const exists = await ExamTest.findOne({
+          _id: {$ne: args._id}, 
+          examSetBookieId: args.examSetBookieId || updateData.examSetBookieId,
+          title: args.title || updateData.title
+        });
+      if (!!exists) {return {status: 'Error', message: 'Same data alread exists', content: {}};}
+
+      if (!!args.examSetBookieId) {updateData.examSetBookieId = args.examSetBookieId;}
+      if (!!args.title) {updateData.title = args.title;}
+      if (!!args.sequence) {updateData.sequence = args.sequence;}
+      if (!!args.questionCount) {updateData.questionCount = args.questionCount;}
+
+      const updated = await ExamTest.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      if (!!updated) {return {status: 'Success', message: 'Data has been updated successfully', content: Utils.examTest.factor.unit(updated)};}
+      else {return {status: 'Error', message: 'Failed to update data', content: {}};}
+    },
+    deleteExamTest: async (_, args, { token }) => {
+      try {
+        const deleted = ExamTest.deleteOne({_id: args._id});
+        return {status: 'Success', message: 'Data has been deleted', content: deleted};
+      } catch (e) {return {status: 'Error', message: 'Failed to delete data', content: {}};}
     },
 
     // -----   L E S S O N   -----
