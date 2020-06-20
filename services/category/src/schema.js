@@ -23,6 +23,7 @@ module.exports = gql`
         _id: ID!
         cityId: String
         districtName: String
+        city: City
     }
 
     type Role @key(fields: "_id") {
@@ -36,12 +37,14 @@ module.exports = gql`
         roleId: String
         module: ROLE_MODULE
         roleConstant: ROLE_CONSTANT
+        role: Role
     }
 
     type School @key(fields: "_id") {
         _id: ID!
         districtId: String
         name: String
+        district: District
     }
 
     type StudentMemberType @key(fields: "_id") {

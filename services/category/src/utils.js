@@ -45,7 +45,7 @@ const factorCityArray = data => {
 }
 
 const factorDistrict = data => {
-    return data._id !== undefined ? { _id: data._id, cityId: data.cityId, districtName: data.districtName } : null;
+    return data !== undefined ? { _id: data._id, cityId: data.cityId, districtName: data.districtName } : null;
 }
 
 const factorDistrictArray = data => {
