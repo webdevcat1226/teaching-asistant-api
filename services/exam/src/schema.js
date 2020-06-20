@@ -14,10 +14,12 @@ module.exports = gql`
 
     type ExamAnswer @key(fields: "_id") {
         _id: ID!,
-        examSetTestId: String,
+        examSetTestId: String, # exam test id
         subTopicId: String,
         questionNumber: Int,
         correctAnswer: CORRECT_ANSWER
+        subtopic: Subtopic
+        examTest: ExamTest
     }
 
     type ExamSet @key(fields: "_id") {
@@ -31,12 +33,16 @@ module.exports = gql`
         level: EXAMSET_LEVEL,
         showToUsers: Boolean,
         image: String,
+        exam: Exam
+        category: Category
+        publisher: Publisher
     }
 
     type ExamSetBookie @key(fields: "_id") {
         _id: ID!,
         examSetId: String,
         bookieTitle: String,
+        examSet: ExamSet
     }
 
     type ExamTest @key(fields: "_id") {
@@ -45,6 +51,7 @@ module.exports = gql`
         title: String,
         sequence: Int
         questionCount: Int
+        examSetBookie: ExamSetBookie
     }
 
 
@@ -63,7 +70,18 @@ module.exports = gql`
         _id: ID!
         lessonId: String
         title: String
+        lesson: Lesson
     }
+
+    extend type Category @key(fields: "_id") {
+        _id: ID! @external
+    }
+
+    extend type Publisher @key(fields: "_id") {
+        _id: ID! @external
+    }
+
+
 
     type Query {
         # -----   E X A M   -----

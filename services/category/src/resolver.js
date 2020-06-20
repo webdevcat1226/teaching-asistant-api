@@ -16,51 +16,6 @@ const StudentMemberType = require('./models/studentMemberType.model');
 const Utils = require("./utils");
 
 module.exports = {
-  City: {
-    async __resolveReference(ct) {
-      const city = await City.findOne({_id: ct._id});
-      return Utils.factorCity(city);
-    }
-  },
-  District: {
-    async __resolveReference(dt) {
-      const district = await District.findOne({_id: dt._id});
-      return Utils.factorDistrict.unit(district);
-    },
-    async city(dt) {
-      const city = await City.findOne({_id: dt.cityId});
-      return Utils.factorCity(city);
-      // return {__typename: 'City', _id: dt.cityId};
-    }
-  },
-  Role: {
-    async __resolveReference(rl) {
-      const role = await Role.findOne({_id: rl._id});
-      return Utils.factorRole.unit(role);
-    }
-  },
-  RoleAuthority: {
-    async __resolverReference(ra) {
-      const roleA = await RoleAuthority.findOne({_id: ra._id});
-      return Utils.factorRoleAuthority.unit(roleA);
-    },
-    async role(ra) {
-      if (!ra.roleId) return null;
-      const role = await Role.findOne({_id: ra.roleId});
-      return Utils.factorRole.unit(role);
-    }
-  },
-  School: {
-    async __resolveReference(sch) {
-      const school = await School.findOne({_id: sch._id});
-      return Utils.factorSchool.unit(school);
-    },
-    async district(sch) {
-      const district = await District.findOne({_id: sch.districtId});
-      return Utils.factorDistrict.unit(district);
-    }
-  },
-
   Query: {
     // -----   C A T E G O R Y   -----
     category: async (_, args, { token }) => {
@@ -185,7 +140,6 @@ module.exports = {
       return Utils.factorSMT.array(smts);
     },
   },
-
 
   Mutation: {
     // -----   C I T Y   -----
@@ -491,5 +445,62 @@ module.exports = {
     },
 
 
-  }
+  },
+  
+  Category: {
+    async __resolveReference(ct) {
+      const category = await Category.findOne({_id: ct._id});
+      return Utils.factorCategory.unit(category);
+    }
+  },
+  City: {
+    async __resolveReference(ct) {
+      const city = await City.findOne({_id: ct._id});
+      return Utils.factorCity(city);
+    }
+  },
+  District: {
+    async __resolveReference(dt) {
+      const district = await District.findOne({_id: dt._id});
+      return Utils.factorDistrict.unit(district);
+    },
+    async city(dt) {
+      const city = await City.findOne({_id: dt.cityId});
+      return Utils.factorCity(city);
+      // return {__typename: 'City', _id: dt.cityId};
+    }
+  },
+  Role: {
+    async __resolveReference(rl) {
+      const role = await Role.findOne({_id: rl._id});
+      return Utils.factorRole.unit(role);
+    }
+  },
+  RoleAuthority: {
+    async __resolverReference(ra) {
+      const roleA = await RoleAuthority.findOne({_id: ra._id});
+      return Utils.factorRoleAuthority.unit(roleA);
+    },
+    async role(ra) {
+      if (!ra.roleId) return null;
+      const role = await Role.findOne({_id: ra.roleId});
+      return Utils.factorRole.unit(role);
+    }
+  },
+  School: {
+    async __resolveReference(sch) {
+      const school = await School.findOne({_id: sch._id});
+      return Utils.factorSchool.unit(school);
+    },
+    async district(sch) {
+      const district = await District.findOne({_id: sch.districtId});
+      return Utils.factorDistrict.unit(district);
+    }
+  },
+  StudentMemberType: {
+    async __resolveReference(sch) {
+      const smt = await StudentMemberType.findOne({_id: sch._id});
+      return Utils.factorSMT.unit(smt);
+    },
+  },
 };

@@ -12,6 +12,7 @@ const Friend = require('./models/friend.model');
 const Utils = require("./utils");
 
 module.exports = {
+
   Query: {
     // -----   M A N A G E R   -----
     managers: async (_, args, { token }) => {
@@ -376,5 +377,54 @@ module.exports = {
       }
     },
 
-  }
+  },
+
+  Friend: {
+    async __resolveReference(fr) {
+      const friend = await Friend.findOne({_id: fr._id});
+      return Utils.friend.factor.unit(friend);
+    },
+    async student(friend) { 
+      const student = await Student.findOne({_id: friend.studentId});
+      return Utils.student.factor.unit(student);
+    },
+    async teacher(friend) {
+      const teacher = await Teacher.findOne({_id: friend.teacherId});
+      return Utils.teacher.factor.unit(teacher);
+    }
+  },
+
+  Manager: {
+    async __resolveReference(st) {
+      const manager = await Manager.findOne({_id: st._id});
+      return Utils.manager.factor.unit(manager);
+    },
+    district(manager) { return {__typename: "District", _id: manager.districtId}; },
+    role(manager) { return {__typename: "Role", _id: manager.roleId}; },
+  },
+
+  Publisher: {
+    async __resolveReference(pbl) {
+      const publisher = await Publisher.findOne({_id: pbl._id});
+      return Utils.publisher.factor.unit(publisher);
+    },
+  },
+
+  Student: {
+    async __resolveReference(st) {
+      const student = await Student.findOne({_id: st._id});
+      return Utils.student.factor.unit(student);
+    },
+    school(student) { return {__typename: "School", _id: student.schoolId}; },
+    studentMemberType(student) { return {__typename: "StudentMemberType", _id: student.studentMemberTypeId}; }
+  },
+
+  Teacher: {
+    async __resolveReference(tch) {
+      const teacher = await Teacher.findOne({_id: tch._id});
+      return Utils.teacher.factor.unit(teacher);
+    },
+    role(teacher) { return {__typename: "Role", _id: teacher.roleId}; },
+    school(teacher) { return {__typename: "School", _id: teacher.schoolId}; }
+  },
 };

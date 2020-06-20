@@ -54,6 +54,15 @@ module.exports = gql`
         piece: Int
     }
 
+    # extend type Teacher @key(fields: "_id") {
+    #     _id: ID! @external
+    #     role: Role
+    #     school: School
+    # }
+    
+
+
+
     type Query {
         # -----   C A T E G O R Y   -----
         category(_id: ID!): Category

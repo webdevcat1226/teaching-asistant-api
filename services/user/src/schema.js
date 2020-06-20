@@ -3,6 +3,17 @@ module.exports = gql`
     
     scalar JSON
 
+
+    type Friend @key (fields: "_id") {
+        _id: ID!,
+        studentId: String,
+        teacherId: String,
+        isAccepted: Boolean,
+        isSenderAsStudent: Boolean,
+        student: Student
+        teacher: Teacher
+    }
+
     type Manager @key(fields: "_id"){
         _id: ID!,
         roleId: String,
@@ -21,6 +32,16 @@ module.exports = gql`
         twitter: String,
         instagram: String,
         image: String,
+        role: Role
+        district: District
+    }
+
+    type Publisher @key (fields: "_id") {
+        _id: ID!,
+        name: String,
+        email: String,
+        phone: String,
+        address: String,
     }
 
     type Student @key(fields: "_id") {
@@ -39,6 +60,8 @@ module.exports = gql`
         facebook: String,
         instagram: String,
         image: String,
+        school: School
+        studentMemberType: StudentMemberType
     }
 
     type Teacher @key(fields: "_id") {
@@ -57,28 +80,39 @@ module.exports = gql`
         facebook: String,
         instagram: String,
         image: String,
+        role: Role
+        school: School
     }
 
-    type Publisher @key (fields: "_id") {
-        _id: ID!,
-        name: String,
-        email: String,
-        phone: String,
-        address: String,
+    extend type District @key(fields: "_id") {
+        _id: ID! @external
     }
 
-    type Friend @key (fields: "_id") {
-        _id: ID!,
-        studentId: String,
-        teacherId: String,
-        isAccepted: Boolean,
-        isSenderAsStudent: Boolean,
+    extend type Role @key(fields: "_id") {
+        _id: ID! @external
     }
+
+    extend type School @key(fields: "_id") {
+        _id: ID! @external
+    }
+
+    extend type StudentMemberType @key(fields: "_id") {
+        _id: ID! @external
+    }
+
 
     type Query {
+        # -----   F R I E N D   -----
+        friend(_id: ID!): Friend
+        friends(studentId: String, teacherId: String, isAccepted: Boolean, isSenderAsStudent: String, offset: Int, limit: Int): [Friend]!
+
         # -----   M A N A G E R   -----
         manager(_id: ID!): Manager
         managers(roleId: String, districtId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Manager]!
+
+        # -----   P U B L I S H E R   -----
+        publisher(_id: ID!): Publisher
+        publishers(email: String, phone: String, name: String, address: String, offset: Int, limit: Int): [Publisher]!
 
         # -----   S T U D E N T   -----
         student(_id: ID!): Student
@@ -88,16 +122,14 @@ module.exports = gql`
         teacher(_id: ID!): Teacher
         teachers(schoolId: String, roleId: String, isConfirmed: Boolean, offset: Int, limit: Int, forceUpdate: String): [Teacher]!
 
-        # -----   P U B L I S H E R   -----
-        publisher(_id: ID!): Publisher
-        publishers(email: String, phone: String, name: String, address: String, offset: Int, limit: Int): [Publisher]!
-
-        # -----   F R I E N D   -----
-        friend(_id: ID!): Friend
-        friends(studentId: String, teacherId: String, isAccepted: Boolean, isSenderAsStudent: String, offset: Int, limit: Int): [Friend]!
     }
 
     type Mutation {
+
+        # -----   F R I E N D   -----
+        addFriend(studentId: String!, teacherId: String!, isAccepted: Boolean, isSenderAsStudent: Boolean!): UserResponse!
+        updateFriend(_id: ID!, isAccepted: Boolean, isSenderAsStudent: Boolean): UserResponse!
+        deleteFriend(_id: ID!): UserResponse!
 
         # -----   M A N A G E R   -----
         addManager( roleId: String!, districtId: String!, isSystemAdministrator: Boolean, name: String!, surname: String!, dateOfBirth: String!, password: String!, email: String!, gsm: String, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
@@ -106,6 +138,11 @@ module.exports = gql`
         confirmManager( _id: ID!, confirmationKey: Int! ): UserResponse!
         getToken( email: String!, password: String!, clientType: String! ): UserResponse!
         verifyToken( token: String! ): UserResponse!
+        
+        # -----   P U B L I S H E R   -----
+        addPublisher(name: String!, email: String!, phone: String!, address: String!): UserResponse!
+        updatePublisher(_id: ID!, name: String, phone: String, address: String): UserResponse!
+        deletePublisher(_id: ID!): UserResponse!
 
         # -----   S T U D E N T   -----
         addStudent(schoolId: String, studentMemberTypeId: String, name: String!, surname: String!, dateOfBirth: String!, password: String!, gsm: String!, email: String!, facebook: String, twitter: String, instagram: String, image: String): UserResponse!
@@ -118,16 +155,6 @@ module.exports = gql`
         updateTeacher(_id: ID!, schoolId: String, roleId: String, name: String, surname: String, dateOfBirth: String, facebook: String, instagram: String, twitter: String, image: String): UserResponse!
         deleteTeacher(_id: ID!): UserResponse!
         confirmTeacher(_id: ID!, confirmationKey: Int!): UserResponse!
-        
-        # -----   P U B L I S H E R   -----
-        addPublisher(name: String!, email: String!, phone: String!, address: String!): UserResponse!
-        updatePublisher(_id: ID!, name: String, phone: String, address: String): UserResponse!
-        deletePublisher(_id: ID!): UserResponse!
-
-        # -----   F R I E N D   -----
-        addFriend(studentId: String!, teacherId: String!, isAccepted: Boolean, isSenderAsStudent: Boolean!): UserResponse!
-        updateFriend(_id: ID!, isAccepted: Boolean, isSenderAsStudent: Boolean): UserResponse!
-        deleteFriend(_id: ID!): UserResponse!
 
     }
 

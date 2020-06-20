@@ -474,5 +474,89 @@ module.exports = {
         return {status: 'Error', message: 'Something went wrong', content: {}};
       }
     },
+  },
+
+
+  Exam: {
+    async __resolveReference(exm) {
+      const exam = await Exam.findOne({_id: exm._id});
+      return Utils.exam.factor.unit(exam);
+    },
+  },
+
+  ExamAnswer: {
+    async __resolveReference(ea) {
+      const examAnswer = await ExamAnswer.findOne({_id: ea._id});
+      return Utils.examAnswer.factor.unit(examAnswer);
+    },
+    async subtopic(ea) {
+      const subtopic = await Subtopic.findOne({_id: ea.subTopicId});
+      console.log(ea, subtopic);
+      return Utils.subtopic.factor.unit(subtopic);
+    },
+    async examTest(ea) {
+      const examTest = await ExamTest.findOne({_id: ea.examSetTestId});
+      return Utils.examTest.factor.unit(examTest);
+    },
+  },
+
+  ExamSet: {
+    async __resolveReference(es) {
+      const examSet = await ExamSet.findOne({_id: es._id});
+      return Utils.examSet.factor.unit(examSet);
+    },
+    async exam(es) {
+      const exam = await Exam.findOne({_id: es.examId});
+      return Utils.exam.factor.unit(exam);
+    },
+    category(es) { return {__typename: "Category", _id: es.categoryId}; },
+    publisher(es) { return {__typename: "Publisher", _id: es.publisherId}; }
+  },
+
+  ExamSetBookie: {
+    async __resolveReference(esb) {
+      const examSetBookie = await ExamSetBookie.findOne({_id: esb._id});
+      return Utils.examSetBookie.factor.unit(examSetBookie);
+    },
+    async examSet(esb) {
+      const examSet = await ExamSet.findOne({_id: esb.examSetId});
+      return Utils.examSet.factor.unit(examSet);
+    },
+  },
+
+  ExamTest: {
+    async __resolveReference(et) {
+      const examTest = await ExamTest.findOne({_id: et._id});
+      return Utils.examTest.factor.unit(examTest);
+    },
+    async examSetBookie(et) {
+      const esb = await ExamSetBookie.findOne({_id: et.examSetBookieId});
+      return Utils.examSetBookie.factor.unit(esb);
+    },
+  },
+
+  Lesson: {
+    async __resolveReference(ls) {
+      const lesson = await Lesson.findOne({_id: ls._id});
+      return Utils.lesson.factor.unit(lesson);
+    },
+  },
+
+  Subtopic: {
+    async __resolveReference(st) {
+      const subtopic = await Subtopic.findOne({_id: st._id});
+      return Utils.subtopic.factor.unit(subtopic);
+    },
+  },
+
+  Topic: {
+    async __resolveReference(tp) {
+      const topic = await Topic.findOne({_id: tp._id});
+      return Utils.topic.factor.unit(topic);
+    },
+    async lesson(topic) {
+      const lesson = await Lesson.findOne({_id: topic.lessonId});
+      return Utils.lesson.factor.unit(lesson);
+    },
   }
 };

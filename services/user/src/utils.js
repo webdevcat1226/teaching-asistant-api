@@ -9,6 +9,20 @@ const setValue = (val, alt) => {
     return val !== undefined ? val : alt;
 }
 
+// Friend
+const checkFriendDuplicated = async where => {
+    const friend = await Friend.findOne(where);
+    return !!friend;
+}
+
+const factorFriend = async fd => {
+    return !!fd ? { _id: fd._id, studentId: fd.studentId, teacherId: fd.teacherId, isAccepted: fd.isAccepted, isSenderAsStudent: fd.isSenderAsStudent } : null;
+}
+
+const factorFriends = async fds => {
+    return !!fds && fds.length > 0 ? (fds.map(fd => factorFriend(fd))) : [];
+}
+
 // Manager
 
 const factorManager = (data) => {
@@ -34,6 +48,20 @@ const factorManagers = (items) => {
 const manageEmailDuplicated = async (email) => {
     const manager = await Manager.findOne({ email: email });
     return !!manager;
+}
+
+// Publisher
+const checkPublisherDuplicated = async (where) => {
+    const publisher = await Publisher.findOne(where);
+    return !!publisher;
+}
+
+const factorPublisher = async (pb) => {
+    return !!pb ? { _id: pb._id, name: pb.name, email: pb.email, phone: pb.phone, address: pb.address } : null;
+}
+
+const factorPublishers = async (pbs) => {
+    return !!pbs && pbs.length > 0 ? pbs.map(pb => factorPublisher(pb)) : [];
 }
 
 // Student
@@ -75,34 +103,6 @@ const factorTeacher = data => {
 
 const factorTeachers = teachers => {
     return !!teachers && teachers.length > 0 ? (teachers.map(teacher => factorTeacher(teacher))) : [];
-}
-
-// Publisher
-const checkPublisherDuplicated = async (where) => {
-    const publisher = await Publisher.findOne(where);
-    return !!publisher;
-}
-
-const factorPublisher = async (pb) => {
-    return !!pb ? { _id: pb._id, name: pb.name, email: pb.email, phone: pb.phone, address: pb.address } : null;
-}
-
-const factorPublishers = async (pbs) => {
-    return !!pbs && pbs.length > 0 ? pbs.map(pb => factorPublisher(pb)) : [];
-}
-
-// Friend
-const checkFriendDuplicated = async where => {
-    const friend = await Friend.findOne(where);
-    return !!friend;
-}
-
-const factorFriend = async fd => {
-    return !!fd ? { _id: fd._id, studentId: fd.studentId, teacherId: fd.teacherId, isAccepted: fd.isAccepted, isSenderAsStudent: fd.isSenderAsStudent } : null;
-}
-
-const factorFriends = async fds => {
-    return !!fds && fds.length > 0 ? (fds.map(fd => factorFriend(fd))) : [];
 }
 
 

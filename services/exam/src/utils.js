@@ -24,7 +24,7 @@ const checkExamDup = async where => {
 
 // -----   E X A M   -----
 const factorExamAnswer = ea => {
-    return !!ea ? {_id: ea._id, examSetTestId: ea.examSetTestId, questionNumber: ea.questionNumber, correctAnswer: ea.correctAnswer} : null;
+    return !!ea ? {_id: ea._id, examSetTestId: ea.examSetTestId, questionNumber: ea.questionNumber, correctAnswer: ea.correctAnswer, subTopicId: ea.subTopicId} : null;
 }
 const factorExamAnswers = eas => {
     return !!eas && eas.length > 0 ? (eas.map(ea => factorExamAnswer(ea))) : [];

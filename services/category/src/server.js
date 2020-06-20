@@ -10,10 +10,10 @@ process.setMaxListeners(0);
 // Direct connection via context
 mongoose.connect(process.env.DATABASE, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
 .then(() => {
-    console.log('[User] Database successfully connected!');
+    console.log('[Category] Database successfully connected!');
 },
 error => {
-    console.log('[User] Database could not connected', error);
+    console.log('[Category] Database could not connected', error);
 });
 
 const server = new ApolloServer({
@@ -30,5 +30,5 @@ const server = new ApolloServer({
 });
 
 server.listen(process.env.PORT_CATEGORY).then(({url}) => {
-    console.log(`🚀 [User] Server ready at ${url}`);
+    console.log(`🚀 [Category] Server ready at ${url}`);
 });
