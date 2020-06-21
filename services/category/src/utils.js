@@ -63,7 +63,8 @@ const checkDistrictDuplicated = async ({ cityId, districtName }) => {
  * */ 
 
 const factorRole = data => {
-    return !!data ? { _id: data.id, title: data.title, description: data.description } : null;
+    // return !!data ? { _id: data.id, title: data.title, description: data.description } : null;
+    return !!data ? data : null;
 }
 
 const factorRoleArray = roles => {

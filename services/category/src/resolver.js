@@ -19,7 +19,7 @@ module.exports = {
   Query: {
     // -----   C A T E G O R Y   -----
     category: async (_, args, { token }) => {
-      const category = await Category.findOne({_id: args._id});
+      const category = await Category.findOne({ _id: args._id });
       return Utils.factorCategory.unit(category);
     },
     categories: async (_, args, { token }) => {
@@ -74,8 +74,8 @@ module.exports = {
       }
       return Utils.factorDistrict.array(districts);
     },
-    district: async(_, args, { token }) => {
-      const district = await District.findOne({_id: args._id});
+    district: async (_, args, { token }) => {
+      const district = await District.findOne({ _id: args._id });
       return Utils.factorDistrict.unit(district);
     },
 
@@ -90,7 +90,7 @@ module.exports = {
         roles = await Role.find(where);
       }
       return Utils.factorRole.array(roles);
-    }, 
+    },
     role: async (_, args, { token }) => {
       const role = await Role.findOne({ _id: args._id });
       return Utils.factorRole.unit(role);
@@ -115,10 +115,10 @@ module.exports = {
 
     // -----     S C H O O L     -----
     school: async (_, args, { token }) => {
-      const school = await School.findOne({_id: args._id});
+      const school = await School.findOne({ _id: args._id });
       return Utils.factorSchool.unit(school);
     },
-    schools: async(_, args, { token }) => {
+    schools: async (_, args, { token }) => {
       let where = {};
       if (!!args.districtId) { where.districtId = args.districtId; }
       if (!!args.name) { where.name = new RegExp(args.name, 'i'); }
@@ -130,7 +130,7 @@ module.exports = {
 
     // -----     STUDENT MEMBER TYPE     -----
     studentMemberType: async (_, args, { token }) => {
-      const smt = await StudentMemberType.findOne({_id: args._id});
+      const smt = await StudentMemberType.findOne({ _id: args._id });
       return Utils.factorSMT.unit(smt);
     },
     studentMemberTypes: async (_, args, { token }) => {
@@ -144,33 +144,33 @@ module.exports = {
   Mutation: {
     // -----   C I T Y   -----
     addCategory: async (_, args, { token }) => {
-      const duplicated = await Category.findOne({categoryTitle: args.categoryTitle});
-      if (!!duplicated) { return {status: 'Error', message: 'Title already exists', content: {}}; }
+      const duplicated = await Category.findOne({ categoryTitle: args.categoryTitle });
+      if (!!duplicated) { return { status: 'Error', message: 'Title already exists', content: {} }; }
 
       let category = { _id: new mongoose.mongo.ObjectId(), categoryTitle: args.categoryTitle };
       const created = await Category.create(category);
-      if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.factorCategory.unit(created)}; }
-      else { return {status: 'Error', message: 'Failed to add data', content: {}}; }
+      if (!!created) { return { status: 'Success', message: 'Data has been added successfully', content: Utils.factorCategory.unit(created) }; }
+      else { return { status: 'Error', message: 'Failed to add data', content: {} }; }
     },
     updateCategory: async (_, args, { token }) => {
-      let updateData = await Category.findOne({_id: args._id});
-      if (!updateData) { return {status: "Error", message: 'Data not found', content: {}}; }
+      let updateData = await Category.findOne({ _id: args._id });
+      if (!updateData) { return { status: "Error", message: 'Data not found', content: {} }; }
 
-      let exists = await Category.findOne({categoryTitle: args.categoryTitle});
-      if (exists && updateData._id.equals(exists._id)) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.factorCategory.unit(exists)} }
-      if (exists && !updateData._id.equals(exists._id)) { return {status: 'Error', message: 'Data duplicated', content: {}}; }
+      let exists = await Category.findOne({ categoryTitle: args.categoryTitle });
+      if (exists && updateData._id.equals(exists._id)) { return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorCategory.unit(exists) } }
+      if (exists && !updateData._id.equals(exists._id)) { return { status: 'Error', message: 'Data duplicated', content: {} }; }
 
-      const updated = await Category.findOneAndUpdate({_id: args._id}, {categoryTitle: args.categoryTitle}, {returnOriginal: false});
-      if (!!updated) { return {status: 'Success', message: 'Data updated successfully', content: Utils.factorCategory.unit(updated)}; }
-      else { return {status: 'Error', message: 'Failed to update data', content: {}}; }
+      const updated = await Category.findOneAndUpdate({ _id: args._id }, { categoryTitle: args.categoryTitle }, { returnOriginal: false });
+      if (!!updated) { return { status: 'Success', message: 'Data updated successfully', content: Utils.factorCategory.unit(updated) }; }
+      else { return { status: 'Error', message: 'Failed to update data', content: {} }; }
     },
     deleteCategory: async (_, args, { token }) => {
       try {
-        const deleted = await Category.deleteOne({_id: args._id});
-        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+        const deleted = await Category.deleteOne({ _id: args._id });
+        return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
       }
       catch (e) {
-        return {status: 'Error', message: 'Something went wrong', content: {}};
+        return { status: 'Error', message: 'Something went wrong', content: {} };
       }
     },
 
@@ -282,9 +282,9 @@ module.exports = {
         return { status: 'Error', message: 'Failed to update data...', content: {} };
       }
     },
-    deleteDistrict: async(_, args, { token }) => {
+    deleteDistrict: async (_, args, { token }) => {
       try {
-        const deleted = await District.deleteOne({  _id: args._id });
+        const deleted = await District.deleteOne({ _id: args._id });
         return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
@@ -309,7 +309,13 @@ module.exports = {
     },
     updateRole: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['title', 'description']);
-      let updateData = {};
+      let updateData = await Role.findOne({_id: args._id});
+      
+      if (!!args.title) {
+        const exists = await Role.findOne({_id: {$ne: args._id}, title: args.title});
+        if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: {}};}
+      }
+
       if (args.title !== undefined) { updateData.title = args.title; }
       if (args.description !== undefined) { updateData.description = args.description; }
 
@@ -322,8 +328,13 @@ module.exports = {
     },
     deleteRole: async (_, args, { token }) => {
       try {
-        const deleted = Role.deleteOne({ _id: args._id });
-        return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+        let deleted = await Role.deleteOne({ _id: args._id });
+        if (deleted.n > 0) {
+          deleted.id = args._id;
+          return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+        } else {
+          return { status: 'Error', message: 'Not found data to delete', content: deleted };
+        }
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
@@ -334,35 +345,36 @@ module.exports = {
       const duplicated = await Utils.checkDuplicate.roleAuthority({ roleId: args.roleId, module: args.module, roleConstant: args.roleConstant });
       if (duplicated === true) { return { status: 'Error', message: 'Role authority already defined!', content: {} }; }
 
-      let roleAuthority = { _id: mongoose.mongo.ObjectId(), roleId: args.roleId, module: args.module,  roleConstant: args.roleConstant };
+      let roleAuthority = { _id: mongoose.mongo.ObjectId(), roleId: args.roleId, module: args.module, roleConstant: args.roleConstant };
       const created = await RoleAuthority.create(roleAuthority);
       if (!created) { return { status: 'Error', message: 'Failed to add data', content: {} }; }
       else { return { status: 'Success', message: "Data had been added successfully", content: Utils.factorRoleAuthority.unit(created) }; }
     },
     updateRoleAuthority: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['roleId', 'module', 'roleConstant']);
-      const roleAuthority = await RoleAuthority.findOne({_id: args._id});
+      const roleAuthority = await RoleAuthority.findOne({ _id: args._id });
       if (!roleAuthority) { return { status: 'Error', message: 'Not found data', content: {} }; }
 
       let updateData = { roleId: roleAuthority.roleId, module: roleAuthority.module, roleConstant: roleAuthority.roleConstant };
-      let update_count = 0;
-      if (!!args.roleId && args.roleId != updateData.roleId) { updateData.roleId = args.roleId; update_count ++; }
-      if (!!args.module && args.module != updateData.module) { updateData.module = args.module; update_count ++; }
-      if (!!args.roleConstant && args.roleConstant != updateData.roleConstant) { updateData.roleConstant = args.roleConstant; update_count++; }
 
-      if (update_count === 0) { return { status: 'Status', message: 'Data has been updated successfully', content: Utils.factorRoleAuthority.unit(roleAuthority) }; }
+      if (!!args.roleId) { updateData.roleId = args.roleId; }
+      if (!!args.module) { updateData.module = args.module; }
+      if (!!args.roleConstant) { updateData.roleConstant = args.roleConstant; }
 
-      const updateExist = await RoleAuthority.findOne(updateData);
-      if (!!updateExist) { return {status: 'Error', message: 'Same info already exists.', content: {}}; }
-
-      const updated = await RoleAuthority.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
+      const updateExist = await RoleAuthority.findOne({...updateData, _id: {$ne: args._id}});
+      if (!!updateExist) { return { status: 'Error', message: 'Same info already exists.', content: {} }; }
+      const updated = await RoleAuthority.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
       if (!!updated) { return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorRoleAuthority.unit(updated) }; }
       else { return { status: 'Error', message: 'Failed to update data...', content: {} }; }
     },
     deleteRoleAuthority: async (_, args, { token }) => {
       try {
-        const deleted = await RoleAuthority.deleteOne({_id: args._id});
-        return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+        const deleted = await RoleAuthority.deleteOne({ _id: args._id });
+        if (deleted.n > 0) { 
+          deleted._id = args._id;
+          return { status: 'Success', message: 'Data has been deleted successfully', content: deleted }; } 
+        else {return { status: 'Error', message: 'Not found to delete', content: {}};}
+        
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
@@ -371,35 +383,35 @@ module.exports = {
     // -----     S C H O O L     -----
     addSchool: async (_, args, { token }) => {
       const duplicated = await Utils.checkDuplicate.school({ districtId: args.districtId, name: args.name });
-      if (!!duplicated) { return {status: 'Error', message: 'School already exists!', content: {}}; }
+      if (!!duplicated) { return { status: 'Error', message: 'School already exists!', content: {} }; }
 
       let school = { _id: new mongoose.mongo.ObjectId(), districtId: args.districtId, name: args.name };
       const created = await School.create(school);
-      if (!created) { return {status: 'Error', message: 'Failed to add data', content: {}}; }
-      else { return {status: 'Success', message: 'Data has been added successfully', content: Utils.factorSchool.unit(created) }; }
+      if (!created) { return { status: 'Error', message: 'Failed to add data', content: {} }; }
+      else { return { status: 'Success', message: 'Data has been added successfully', content: Utils.factorSchool.unit(created) }; }
     },
     updateSchool: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['districtId', 'name']);
       const school = await School.findOne({ _id: args._id });
-      if (!school) { return {status: 'Error', message: 'Not found data', content: {}}; }
+      if (!school) { return { status: 'Error', message: 'Not found data', content: {} }; }
 
       let updateData = { districtId: school.districtId, name: school.name };
       let update_count = 0;
       if (!!args.districtId && args.districtId != updateData.districtId) { update.districtId = args.districtId; update_count++; }
       if (!!args.name && args.name != updateData.name) { updateData.name = args.name; update_count++; }
 
-      if (update_count === 0) { return {status: 'Success', message: 'Data has been created successfully', content: Utils.factorSchool.unit(school)}; }
+      if (update_count === 0) { return { status: 'Success', message: 'Data has been created successfully', content: Utils.factorSchool.unit(school) }; }
 
       const updateExists = await School.findOne(updateData);
-      if (!!updateExists) { return { status: 'Error', message: 'Same info already exists', content: {}}; }
+      if (!!updateExists) { return { status: 'Error', message: 'Same info already exists', content: {} }; }
 
-      const updated = await School.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
-      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSchool.unit(updated)}; }
-      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+      const updated = await School.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
+      if (!!updated) { return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSchool.unit(updated) }; }
+      else { return { status: 'Error', message: 'Failed to update data...', content: {} }; }
     },
     deleteSchool: async (_, args, { token }) => {
       try {
-        const deleted = await School.deleteOne({_id: args._id});
+        const deleted = await School.deleteOne({ _id: args._id });
         return { success: 'Success', message: 'Data has been deleted successfully', content: deleted };
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
@@ -409,97 +421,97 @@ module.exports = {
     // -----     STUDENT MEMBER TYPE     -----
     addStudentMemberType: async (_, args, { token }) => {
       const duplicated = await Utils.checkDuplicate.smt({ typeTitle: args.typeTitle });
-      if (!!duplicated) { return {status: 'Error', message: 'Student member type already exists', content: {}}; }
+      if (!!duplicated) { return { status: 'Error', message: 'Student member type already exists', content: {} }; }
 
       let smt = { _id: new mongoose.mongo.ObjectId(), typeTitle: args.typeTitle, descriptions: args.descriptions || "", piece: args.piece || 0 };
       const created = await StudentMemberType.create(smt);
-      if (!created) { return {status: 'Error', message: 'Failed to add data', content: {}}; }
-      else { return {status: 'Success', message: 'Data had been added successfully', content: Utils.factorSMT.unit(created)}; }
+      if (!created) { return { status: 'Error', message: 'Failed to add data', content: {} }; }
+      else { return { status: 'Success', message: 'Data had been added successfully', content: Utils.factorSMT.unit(created) }; }
     },
     updateStudentMemberType: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['typeTitle', 'descriptions', 'piece']);
-      const smt = await StudentMemberType.findOne({_id: args._id});
-      if (!smt) { return {status: 'Error', message: "Not found data", content: {}}; }
+      const smt = await StudentMemberType.findOne({ _id: args._id });
+      if (!smt) { return { status: 'Error', message: "Not found data", content: {} }; }
 
       let updateData = { typeTitle: smt.typeTitle, descriptions: smt.descriptions, piece: smt.piece };
       let update_count = 0;
-      if (!!args.typeTitle && args.typeTitle != updateData.typeTitle) { updateData.typeTitle = args.typeTitle; update_count ++; }
-      if (!!args.descriptions && args.descriptions != updateData.descriptions) { updateData.descriptions = args.descriptions; update_count ++; }
-      if (!!args.piece && args.piece !== updateData.piece) { updateData.piece = args.piece; update_count ++; }
+      if (!!args.typeTitle && args.typeTitle != updateData.typeTitle) { updateData.typeTitle = args.typeTitle; update_count++; }
+      if (!!args.descriptions && args.descriptions != updateData.descriptions) { updateData.descriptions = args.descriptions; update_count++; }
+      if (!!args.piece && args.piece !== updateData.piece) { updateData.piece = args.piece; update_count++; }
 
-      const updateExists = await StudentMemberType.findOne({typeTitle: args.typeTitle});
-      if (!!updateExists) { return {status: 'Error', message: 'Same info already exists.', content: {}}; }
+      const updateExists = await StudentMemberType.findOne({ typeTitle: args.typeTitle });
+      if (!!updateExists) { return { status: 'Error', message: 'Same info already exists.', content: {} }; }
 
       const updated = await StudentMemberType.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
-      if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSMT.unit(updated)}; }
-      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+      if (!!updated) { return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSMT.unit(updated) }; }
+      else { return { status: 'Error', message: 'Failed to update data...', content: {} }; }
 
     },
     deleteStudentMemberType: async (_, args, { token }) => {
       try {
-        const deleted = await StudentMemberType.deleteOne({_id: args._id});
-        return {status: 'Success', message: 'Data had been deleted successfully', content: deleted};
+        const deleted = await StudentMemberType.deleteOne({ _id: args._id });
+        return { status: 'Success', message: 'Data had been deleted successfully', content: deleted };
       } catch (e) {
-        return {status: 'Error', message: 'Failed to delete data...', content: e.message};
+        return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
     },
 
 
   },
-  
+
   Category: {
     async __resolveReference(ct) {
-      const category = await Category.findOne({_id: ct._id});
+      const category = await Category.findOne({ _id: ct._id });
       return Utils.factorCategory.unit(category);
     }
   },
   City: {
     async __resolveReference(ct) {
-      const city = await City.findOne({_id: ct._id});
+      const city = await City.findOne({ _id: ct._id });
       return Utils.factorCity(city);
     }
   },
   District: {
     async __resolveReference(dt) {
-      const district = await District.findOne({_id: dt._id});
+      const district = await District.findOne({ _id: dt._id });
       return Utils.factorDistrict.unit(district);
     },
     async city(dt) {
-      const city = await City.findOne({_id: dt.cityId});
+      const city = await City.findOne({ _id: dt.cityId });
       return Utils.factorCity(city);
       // return {__typename: 'City', _id: dt.cityId};
     }
   },
   Role: {
     async __resolveReference(rl) {
-      const role = await Role.findOne({_id: rl._id});
+      const role = await Role.findOne({ _id: rl._id });
       return Utils.factorRole.unit(role);
     }
   },
   RoleAuthority: {
     async __resolverReference(ra) {
-      const roleA = await RoleAuthority.findOne({_id: ra._id});
+      const roleA = await RoleAuthority.findOne({ _id: ra._id });
       return Utils.factorRoleAuthority.unit(roleA);
     },
     async role(ra) {
       if (!ra.roleId) return null;
-      const role = await Role.findOne({_id: ra.roleId});
+      const role = await Role.findOne({ _id: ra.roleId });
       return Utils.factorRole.unit(role);
     }
   },
   School: {
     async __resolveReference(sch) {
-      const school = await School.findOne({_id: sch._id});
+      const school = await School.findOne({ _id: sch._id });
       return Utils.factorSchool.unit(school);
     },
     async district(sch) {
-      const district = await District.findOne({_id: sch.districtId});
+      const district = await District.findOne({ _id: sch.districtId });
       return Utils.factorDistrict.unit(district);
     }
   },
   StudentMemberType: {
     async __resolveReference(sch) {
-      const smt = await StudentMemberType.findOne({_id: sch._id});
+      const smt = await StudentMemberType.findOne({ _id: sch._id });
       return Utils.factorSMT.unit(smt);
     },
   },

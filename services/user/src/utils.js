@@ -98,6 +98,7 @@ const factorTeacher = data => {
     };
 
     for (let fld of fields) { teacher[fld] = data[fld]; }
+    teacher['fullname'] = `${!!data['name'] ? data['name'] : ''}${!!data['surname'] ? ' ' + data['surname'] : ''}`;
     return teacher; 
 }
 

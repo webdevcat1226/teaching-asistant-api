@@ -7,7 +7,6 @@ module.exports = gql`
 
     enum ROLE_CONSTANT { Select Insert Update Delete }
 
-
     type Category @key(fields: "_id") {
         _id: ID!,
         categoryTitle: String!
@@ -77,11 +76,11 @@ module.exports = gql`
         districts(offset: Int, limit: Int, forceUpdate: String): [District]!
 
         # -----     R O L E     -----
-        role(_id: ID!): Role
+        role(_id: ID!, forceUpdate: String): Role
         roles(offset: Int, limt: Int, forceUpdate: String): [Role]!
 
         # -----     R O L E    A U T H O R I T Y     -----
-        roleAuthority(_id: ID!): RoleAuthority
+        roleAuthority(_id: ID!, forceUpdate: String): RoleAuthority
         roleAuthorities(roleId: String, module: ROLE_MODULE, roleConstant: ROLE_CONSTANT, offset: Int, limit: Int, forceUpdate: String): [RoleAuthority]!
 
         # -----     S C H O O L     -----
@@ -115,8 +114,8 @@ module.exports = gql`
         deleteRole(_id: ID!): CategoryResponse!
 
         # -----     R O L E    A U T H O R I T Y     -----
-        addRoleAuthority(roleId: String!, module: ROLE_MODULE!, roleConstants: ROLE_CONSTANT!): CategoryResponse!
-        updateRoleAuthority(_id: ID!, roleId: String, module: ROLE_MODULE, roleConstants: ROLE_CONSTANT): CategoryResponse!
+        addRoleAuthority(roleId: String!, module: ROLE_MODULE!, roleConstant: ROLE_CONSTANT!): RoleAuthorityResponse!
+        updateRoleAuthority(_id: ID!, roleId: String, module: ROLE_MODULE, roleConstant: ROLE_CONSTANT): RoleAuthorityResponse!
         deleteRoleAuthority(_id: ID!): CategoryResponse!
 
         # -----     S C H O O L     -----
@@ -134,5 +133,10 @@ module.exports = gql`
         status: String!
         message: String!
         content: JSON
+    }
+    type RoleAuthorityResponse {
+        status: String!
+        message: String!
+        content: RoleAuthority
     }
 `;

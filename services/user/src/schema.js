@@ -70,6 +70,7 @@ module.exports = gql`
         roleId: String,
         name: String,
         surname: String,
+        fullname: String,
         dateOfBirth: String,
         password: String,
         gsm: String,
