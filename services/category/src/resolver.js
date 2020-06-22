@@ -209,45 +209,52 @@ module.exports = {
         return {
           status: 'Success',
           message: "You added a new city successfully",
-          content: {
-            city: Utils.factorCity(created)
-          }
+          content: Utils.factorCity(created)
         };
       }
     },
     updateCity: async (_, args, { token }) => {
-      if (args._id !== undefined && args.code === undefined) {
-        throw new UserInputError('Either of _id or code is required', {
-          invalidArgs: ['_id', 'code']
-        });
-      }
+      // if (args._id !== undefined && args.code === undefined) {
+      //   throw new UserInputError('Either of _id or code is required', {
+      //     invalidArgs: ['_id', 'code']
+      //   });
+      // }
+      let updateData = await City.findOne({_id: args._id});
+      if (!updateData) {return {status: 'Error', message: 'No data found', content: {}};}
 
-      let where = {};
-      if (args._id !== undefined) {
-        where._id = args._id;
+      if (!!args.code) {
+        const duplicated = await City.findOne({
+          _id: {$ne: args._id},
+          code: args.code || updateData.code
+        });
+        if (!!duplicated) { return {status: 'Error', message: 'Duplicated data', content: {}}}
       }
-      if (args.code !== undefined) {
-        where.code = args.code;
-      } console.log(where);
-      const updated = await City.findOneAndUpdate(where, { cityName: args.cityName }, { returnOriginal: false });
+      if (!!args.cityName) {
+        const duplicated = await City.findOne({
+          _id: {$ne: args._id},
+          citName: args.cityName || updateData.cityName
+        });
+        if (!!duplicated) { return {status: 'Error', message: 'Duplicated data', content: {}}}
+      }
+      // check duplicated
+
+      if (!!args.code) { updateData.code = args.code; }
+      if (!!args.cityName) { updateData.cityName = args.cityName; }
+
+      const updated = await City.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false });
       if (!!updated) {
         return {
           status: 'Success',
           message: 'Data has been updated successfully',
-          content: { city: Utils.factorCity(updated) },
+          content: Utils.factorCity(updated),
         };
-      } else {
-        return {
-          status: 'Error',
-          message: 'Failed to udpate data...',
-          content: { city: Utils.factorCity(updated) },
-        };
-      }
+      } else {return { status: 'Error', message: 'Failed to udpate data...', content: {}};}
     },
     deleteCity: async (_, args, { token }) => {
       try {
-        const deleted = await City.deleteOne({ _id: args._id });
-        return { status: 'Succcess', message: 'Data has been deleted successfully', content: deleted };
+        let deleted = await City.deleteOne({ _id: args._id });
+        deleted._id = args._id;
+        return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message }
       }
@@ -271,21 +278,34 @@ module.exports = {
     },
     updateDistrict: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['cityId', 'districtName']);
-      let updateData = {};
-      if (args.cityId !== undefined) { updateData.cityId = args.cityId; }
-      if (args.districtName !== undefined) { updateData.districtName = args.districtName; }
+      let updateData = await District.findOne({_id: args._id});
+      if (!updateData) { return {status: 'Error', message: 'Not data to update', content: null}}
+
+      // check duplicated
+      
+      const exists = await District.findOne({
+        _id: {$ne: args._id},
+        cityId: args.cityId || updateData.cityId,
+        districtName: args.districtName || updateData.districtName,
+      });
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: null};}
+
+      if (!!args.cityId) { updateData.cityId = args.cityId; }
+      if (!!args.districtName) { updateData.districtName = args.districtName; }
 
       const updated = await District.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
       if (!!updated) {
-        return { status: 'Success', message: 'Data has been updated successfully', content: { district: Utils.factorDistrict.unit(updated) } };
-      } else {
-        return { status: 'Error', message: 'Failed to update data...', content: {} };
-      }
+        return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorDistrict.unit(updated) };
+      } else {return { status: 'Error', message: 'Failed to update data...', content: null }; }
     },
     deleteDistrict: async (_, args, { token }) => {
       try {
-        const deleted = await District.deleteOne({ _id: args._id });
-        return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+        let deleted = await District.deleteOne({ _id: args._id });
+        if (deleted.n > 0) {
+          deleted._id = args._id;
+          return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+        } else {return { status: 'Error', message: 'No data to delete', content: deleted };}
+
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
@@ -383,27 +403,30 @@ module.exports = {
     // -----     S C H O O L     -----
     addSchool: async (_, args, { token }) => {
       const duplicated = await Utils.checkDuplicate.school({ districtId: args.districtId, name: args.name });
-      if (!!duplicated) { return { status: 'Error', message: 'School already exists!', content: {} }; }
+      if (!!duplicated) { return { status: 'Error', message: 'School already exists!', content: null }; }
 
       let school = { _id: new mongoose.mongo.ObjectId(), districtId: args.districtId, name: args.name };
       const created = await School.create(school);
-      if (!created) { return { status: 'Error', message: 'Failed to add data', content: {} }; }
+      if (!created) { return { status: 'Error', message: 'Failed to add data', content: null }; }
       else { return { status: 'Success', message: 'Data has been added successfully', content: Utils.factorSchool.unit(created) }; }
     },
     updateSchool: async (_, args, { token }) => {
       Utils.checkOptionalRequired(args, ['districtId', 'name']);
-      const school = await School.findOne({ _id: args._id });
-      if (!school) { return { status: 'Error', message: 'Not found data', content: {} }; }
 
-      let updateData = { districtId: school.districtId, name: school.name };
-      let update_count = 0;
-      if (!!args.districtId && args.districtId != updateData.districtId) { update.districtId = args.districtId; update_count++; }
-      if (!!args.name && args.name != updateData.name) { updateData.name = args.name; update_count++; }
+      // check existence
+      let updateData = await School.findOne({ _id: args._id });
+      if (!updateData) { return { status: 'Error', message: 'Not found data', content: null }; }
 
-      if (update_count === 0) { return { status: 'Success', message: 'Data has been created successfully', content: Utils.factorSchool.unit(school) }; }
-
-      const updateExists = await School.findOne(updateData);
-      if (!!updateExists) { return { status: 'Error', message: 'Same info already exists', content: {} }; }
+      // check duplicate
+      const exists = await School.findOne({
+        _id: {$ne: args._id},
+        districtId: args.districtId || updateData.districtId,
+        name: args.name || updateData.name,
+      });
+      if (!!exists) { return {status: 'Error', message: 'Duplicated data', content: null};}
+      
+      if (!!args.name) { updateData.name = args.name; }
+      if (!!args.districtId) { updateData.districtId = args.districtId; }
 
       const updated = await School.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
       if (!!updated) { return { status: 'Success', message: 'Data has been updated successfully', content: Utils.factorSchool.unit(updated) }; }
@@ -411,8 +434,9 @@ module.exports = {
     },
     deleteSchool: async (_, args, { token }) => {
       try {
-        const deleted = await School.deleteOne({ _id: args._id });
-        return { success: 'Success', message: 'Data has been deleted successfully', content: deleted };
+        let deleted = await School.deleteOne({ _id: args._id });
+
+        return { status: 'Success', message: 'Data has been deleted successfully', content: {...deleted, _id: args._id} };
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
@@ -455,8 +479,6 @@ module.exports = {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }
     },
-
-
   },
 
   Category: {

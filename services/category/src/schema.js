@@ -68,11 +68,11 @@ module.exports = gql`
         categories(categoryTitle: String, offset: Int, limit: Int): [Category]!
 
         # -----   C I T Y   -----
-        city(_id: ID, code: Int): City
+        city(_id: ID, code: Int, forceUpdate: String): City
         cities(offset: Int, limit: Int, forceUpdate: String): [City]!
 
         # -----     D I S T R I C T     -----
-        district(_id: ID!): District
+        district(_id: ID!, forceUpdate: String): District
         districts(offset: Int, limit: Int, forceUpdate: String): [District]!
 
         # -----     R O L E     -----
@@ -84,7 +84,7 @@ module.exports = gql`
         roleAuthorities(roleId: String, module: ROLE_MODULE, roleConstant: ROLE_CONSTANT, offset: Int, limit: Int, forceUpdate: String): [RoleAuthority]!
 
         # -----     S C H O O L     -----
-        school(_id: ID!): School
+        school(_id: ID!, forceUpdate: String): School
         schools(districtId: String, name: String, offset: Int, limit: Int, forceUpdate: String): [School]!
 
         # -----     STUDENT MEMBER TYPE     -----
@@ -100,12 +100,12 @@ module.exports = gql`
 
         # -----   C I T Y   -----
         addCity(cityName: String!): CategoryResponse!
-        updateCity(_id: ID, code: Int, cityName: String!): CategoryResponse!
+        updateCity(_id: ID!, code: Int, cityName: String): CategoryResponse!
         deleteCity(_id: ID!): CategoryResponse!
 
         # -----     D I S T R I C T     -----
-        addDistrict(cityId: String!, districtName: String!): CategoryResponse!
-        updateDistrict(_id: ID, cityId: String, districtName: String): CategoryResponse!
+        addDistrict(cityId: String!, districtName: String!): DistrictResponse!
+        updateDistrict(_id: ID, cityId: String, districtName: String): DistrictResponse!
         deleteDistrict(_id: ID!): CategoryResponse!
 
         # -----     R O L E     -----
@@ -119,8 +119,8 @@ module.exports = gql`
         deleteRoleAuthority(_id: ID!): CategoryResponse!
 
         # -----     S C H O O L     -----
-        addSchool(districtId: String!, name: String!): CategoryResponse!
-        updateSchool(_id: ID!, districtId: String, name: String): CategoryResponse!
+        addSchool(districtId: String!, name: String!): SchoolResponse!
+        updateSchool(_id: ID!, districtId: String, name: String): SchoolResponse!
         deleteSchool(_id: ID!): CategoryResponse!
 
         # -----     STUDENT MEMBER TYPE     -----
@@ -129,14 +129,8 @@ module.exports = gql`
         deleteStudentMemberType(_id: ID!): CategoryResponse!
     }
 
-    type CategoryResponse {
-        status: String!
-        message: String!
-        content: JSON
-    }
-    type RoleAuthorityResponse {
-        status: String!
-        message: String!
-        content: RoleAuthority
-    }
+    type CategoryResponse { status: String!, message: String!, content: JSON }
+    type RoleAuthorityResponse { status: String!, message: String!, content: RoleAuthority }
+    type DistrictResponse { status: String!, message: String!, content: District }
+    type SchoolResponse { status: String!, message: String!, content: School }
 `;
