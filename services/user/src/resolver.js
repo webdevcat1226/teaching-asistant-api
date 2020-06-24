@@ -111,7 +111,7 @@ module.exports = {
       // gsm: String, email: String!, facebook: String, twitter: String, instagram: String, image: String
       const duplicated = await Utils.manager.checkDuplicate(args.email);
       if (!!duplicated) {
-        return { status: 'Error', message: 'Email alread exists', content: {} };
+        return { status: 'Error', message: 'Email alread exists', content: null };
       }
 
       const manager = {
@@ -129,7 +129,7 @@ module.exports = {
       if (!!created) {
         return { status: 'Success', message: 'Data has been added successfully', content: Utils.manager.factor.unit(created) }; //Utils.manager.factor.unit(created)
       } else {
-        return { status: 'Error', message: 'Failed to add data...', content: {} };
+        return { status: 'Error', message: 'Failed to add data...', content: null };
       }
     },
     updateManager: async (_, args, { token }) => {
@@ -142,14 +142,14 @@ module.exports = {
       if (!!updated) {
         return { status: 'Success', message: 'Data has been updated successfully', content: Utils.manager.factor.unit(updated) };
       } else {
-        return { status: 'Error', message: 'Failed to update data...', content: {} };
+        return { status: 'Error', message: 'Failed to update data...', content: null };
       }
     },
     deleteManager: async (_, args, { token }) => {
-      const deleted = Manager.deleteOne({ _id: args._id });
+      const deleted = await Manager.deleteOne({ _id: args._id });
       if (!!deleted) {
         if (deleted.deletedCount > 0) {
-          return { status: 'Success', message: 'Data has been deleted successfully', content: deleted };
+          return { status: 'Success', message: 'Data has been deleted successfully', content: {...deleted, _id: args._id} };
         } else {
           return { status: 'Error', message: 'Not found data to delete', content: {} };
         }
@@ -223,33 +223,33 @@ module.exports = {
     // -----   S T U D E N T   -----
     addStudent: async (_, args, { token }) => {
       const emailDup = await Utils.student.checkDuplicate({email: args.email});
-      if (!!emailDup) { return {status: 'Error', message: 'Email already exists!', content: {}}; }
+      if (!!emailDup) { return {status: 'Error', message: 'Email already exists!', content: null}; }
       const phoneDup = await Utils.student.checkDuplicate({gsm: args.gsm});
-      if (!!phoneDup) { return {status: 'Error', message: 'Phone number already exists!', content: {}}; }
+      if (!!phoneDup) { return {status: 'Error', message: 'Phone number already exists!', content: null}; }
 
       let student = {_id: new mongoose.mongo.ObjectId(), email: args.email, gsm: args.gsm, name: args.name, surname: args.surname, dateOfBirth: args.dateOfBirth, registrationDate: new Date().toISOString(), isConfirmed: false,
-        schoolId: args.schoolId || '', studentMemberTypeId: args.studentMemberTypeId || "", facebook: args.facebook || "", instagram: args.instagram || "", image: args.image || ""};
+        schoolId: args.schoolId || '', studentMemberTypeId: args.studentMemberTypeId || "", facebook: args.facebook || "", instagram: args.instagram || "", twitter: args.twitter || "", image: args.image || ""};
       student.confirmationKey = Math.floor(Math.random() * 900000 + 100000); // 6 digits;
       const saltRounds = 10;
       const salt = await bcrypt.genSalt(saltRounds);
       student.password = await bcrypt.hash(args.password, salt);
       const created = await Student.create(student);
       if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.student.factor.unit(created)}; } 
-      else { return {status: 'Error', message: 'Failed to add data...', content: {}}; }
+      else { return {status: 'Error', message: 'Failed to add data...', content: null}; }
     },
     updateStudent: async (_, args, { token }) => {
-      const fields = ['_id', 'schoolId', 'studentMemberTypeId', 'name', 'surname', 'dateOfBirth', 'facebook', 'instagram', 'image'];
+      const fields = ['_id', 'schoolId', 'studentMemberTypeId', 'name', 'surname', 'dateOfBirth', 'facebook', 'instagram', 'twitter', 'image'];
       let updateData = await Student.findOne({_id: args._id});
 
       for (let fld of fields) { if (!!args[fld]) updateData[fld] = args[fld]; }
       const updated = await Student.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false});
       if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.student.factor.unit(updated)}; }
-      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: null}; }
     },
     deleteStudent: async (_, args, { token }) => {
       try {
         const deleted = await Student.deleteOne({_id: args._id});
-        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+        return {status: 'Success', message: 'Data has been deleted successfully', content: {...deleted, _id: args._id}};
       } catch (e) {
         return {status: 'Error', message: 'Failed to delete data...', content:{}};
       }
@@ -272,9 +272,9 @@ module.exports = {
     // -----   T E A C H E R   -----
     addTeacher: async (_, args, { token }) => {
       const emailDup = await Utils.teacher.checkDuplicate({email: args.email});
-      if (!!emailDup) { return {status: 'Error', message: 'Email already exists!', content: {}}; }
+      if (!!emailDup) { return {status: 'Error', message: 'Email already exists!', content: null}; }
       const phoneDup = await Utils.teacher.checkDuplicate({gsm: args.gsm});
-      if (!!phoneDup) { return {status: 'Error', message: 'Phone number already exists!', content: {}}; }
+      if (!!phoneDup) { return {status: 'Error', message: 'Phone number already exists!', content: null}; }
 
       let teacher = {_id: new mongoose.mongo.ObjectId(), email: args.email, gsm: args.gsm, name: args.name, surname: args.surname, dateOfBirth: args.dateOfBirth, registrationDate: new Date().toISOString(), isConfirmed: false,
         schoolId: args.schoolId || '', roleId: args.roleId || "", facebook: args.facebook || "", instagram: args.instagram || "", twitter: args.twitter || "", image: args.image || ""};
@@ -284,7 +284,7 @@ module.exports = {
       teacher.password = await bcrypt.hash(args.password, salt);
       const created = await Teacher.create(teacher);
       if (!!created) { return {status: 'Success', message: 'Data has been added successfully', content: Utils.teacher.factor.unit(created)}; } 
-      else { return {status: 'Error', message: 'Failed to add data...', content: {}}; }
+      else { return {status: 'Error', message: 'Failed to add data...', content: null}; }
     },
     updateTeacher: async (_, args, { token }) => {
       const fields = ['_id', 'schoolId', 'roleId', 'name', 'surname', 'dateOfBirth', 'facebook', 'instagram', 'twitter', 'image'];
@@ -293,12 +293,12 @@ module.exports = {
       for (let fld of fields) { if (!!args[fld]) updateData[fld] = args[fld]; }
       const updated = await Teacher.findOneAndUpdate({_id: args._id}, updateData, { returnOriginal: false});
       if (!!updated) { return {status: 'Success', message: 'Data has been updated successfully', content: Utils.teacher.factor.unit(updated)}; }
-      else { return {status: 'Error', message: 'Failed to update data...', content: {}}; }
+      else { return {status: 'Error', message: 'Failed to update data...', content: null}; }
     },
     deleteTeacher: async (_, args, { token }) => {
       try {
         const deleted = await Teacher.deleteOne({_id: args._id});
-        return {status: 'Success', message: 'Data has been deleted successfully', content: deleted};
+        return {status: 'Success', message: 'Data has been deleted successfully', content: {...deleted, _id: args._id}};
       } catch (e) {
         return {status: 'Error', message: 'Failed to delete data...', content:{}};
       }

@@ -88,7 +88,7 @@ module.exports = gql`
         schools(districtId: String, name: String, offset: Int, limit: Int, forceUpdate: String): [School]!
 
         # -----     STUDENT MEMBER TYPE     -----
-        studentMemberType(_id: ID!): StudentMemberType
+        studentMemberType(_id: ID!, forceUpdate: String): StudentMemberType
         studentMemberTypes(offset: Int, limit: Int, forceUpdate: String): [StudentMemberType]!
     }
 
@@ -124,8 +124,8 @@ module.exports = gql`
         deleteSchool(_id: ID!): CategoryResponse!
 
         # -----     STUDENT MEMBER TYPE     -----
-        addStudentMemberType(typeTitle: String!, descriptions: String, piece: Int): CategoryResponse!
-        updateStudentMemberType(_id: ID!, typeTitle: String, descriptions: String, piece: Int): CategoryResponse!
+        addStudentMemberType(typeTitle: String!, descriptions: String, piece: Int): StudentMemberTypeResponse!
+        updateStudentMemberType(_id: ID!, typeTitle: String, descriptions: String, piece: Int): StudentMemberTypeResponse!
         deleteStudentMemberType(_id: ID!): CategoryResponse!
     }
 
@@ -133,4 +133,5 @@ module.exports = gql`
     type RoleAuthorityResponse { status: String!, message: String!, content: RoleAuthority }
     type DistrictResponse { status: String!, message: String!, content: District }
     type SchoolResponse { status: String!, message: String!, content: School }
+    type StudentMemberTypeResponse { status: String!, message: String, content: StudentMemberType }
 `;

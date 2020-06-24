@@ -33,6 +33,8 @@ const factorManager = (data) => {
     for (let fld of fields) {
         manager[fld] = setValue(data[fld], "");
     }
+    manager['fullname'] = `${!!data['name'] ? data['name'] : ''}${!!data['surname'] ? ' ' + data['surname'] : ''}`;
+    manager['password'] = '_SECRET_';
     return manager;
 }
 
@@ -71,12 +73,14 @@ const checkStudentDuplicated = async (where) => {
 }
 
 const factorStudent = (data) => {
-    const fields = ['_id', 'schoolId', 'studentMemberTypeId', 'name', 'surname', 'dateOfBirth', 'password', 'gsm', 'email', 'isConfirmed', 'registrationDate', 'facebook', 'instagram', 'image'];
+    const fields = ['_id', 'schoolId', 'studentMemberTypeId', 'name', 'surname', 'dateOfBirth', 'password', 'gsm', 'email', 'isConfirmed', 'registrationDate', 'facebook', 'instagram', 'twitter', 'image'];
     if (!data) return null;
     let student = {
         'confirmationKey': 0,
     };
     for (let fld of fields) { student[fld] = data[fld]; }
+    student['fullname'] = `${!!data['name'] ? data['name'] : ''}${!!data['surname'] ? ' ' + data['surname'] : ''}`;
+    student['password'] = '_SECRET_';
     return student;
 }
 
@@ -99,6 +103,7 @@ const factorTeacher = data => {
 
     for (let fld of fields) { teacher[fld] = data[fld]; }
     teacher['fullname'] = `${!!data['name'] ? data['name'] : ''}${!!data['surname'] ? ' ' + data['surname'] : ''}`;
+    teacher['password'] = '_SECRET_';
     return teacher; 
 }
 

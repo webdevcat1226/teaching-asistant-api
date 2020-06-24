@@ -124,7 +124,7 @@ module.exports = {
       if (!!args.name) { where.name = new RegExp(args.name, 'i'); }
       const offset = !!args.offset ? args.offset : 0;
       const limit = !!args.limit ? args.limit : 0;
-      const schools = await School.find(where).skip(offset).limit(limit); console.log('school', schools);
+      const schools = await School.find(where).skip(offset).limit(limit); //console.log('school', schools);
       return Utils.factorSchool.array(schools);
     },
 
@@ -445,11 +445,11 @@ module.exports = {
     // -----     STUDENT MEMBER TYPE     -----
     addStudentMemberType: async (_, args, { token }) => {
       const duplicated = await Utils.checkDuplicate.smt({ typeTitle: args.typeTitle });
-      if (!!duplicated) { return { status: 'Error', message: 'Student member type already exists', content: {} }; }
+      if (!!duplicated) { return { status: 'Error', message: 'Data already exists', content: null }; }
 
       let smt = { _id: new mongoose.mongo.ObjectId(), typeTitle: args.typeTitle, descriptions: args.descriptions || "", piece: args.piece || 0 };
       const created = await StudentMemberType.create(smt);
-      if (!created) { return { status: 'Error', message: 'Failed to add data', content: {} }; }
+      if (!created) { return { status: 'Error', message: 'Failed to add data', content: null }; }
       else { return { status: 'Success', message: 'Data had been added successfully', content: Utils.factorSMT.unit(created) }; }
     },
     updateStudentMemberType: async (_, args, { token }) => {
@@ -458,12 +458,11 @@ module.exports = {
       if (!smt) { return { status: 'Error', message: "Not found data", content: {} }; }
 
       let updateData = { typeTitle: smt.typeTitle, descriptions: smt.descriptions, piece: smt.piece };
-      let update_count = 0;
-      if (!!args.typeTitle && args.typeTitle != updateData.typeTitle) { updateData.typeTitle = args.typeTitle; update_count++; }
-      if (!!args.descriptions && args.descriptions != updateData.descriptions) { updateData.descriptions = args.descriptions; update_count++; }
-      if (!!args.piece && args.piece !== updateData.piece) { updateData.piece = args.piece; update_count++; }
+      if (!!args.typeTitle) { updateData.typeTitle = args.typeTitle; }
+      if (!!args.descriptions) { updateData.descriptions = args.descriptions; }
+      if (!!args.piece) { updateData.piece = args.piece; }
 
-      const updateExists = await StudentMemberType.findOne({ typeTitle: args.typeTitle });
+      const updateExists = await StudentMemberType.findOne({ typeTitle: updateData.typeTitle, _id: {$ne: args._id} });
       if (!!updateExists) { return { status: 'Error', message: 'Same info already exists.', content: {} }; }
 
       const updated = await StudentMemberType.findOneAndUpdate({ _id: args._id }, updateData, { returnOriginal: false });
@@ -473,8 +472,8 @@ module.exports = {
     },
     deleteStudentMemberType: async (_, args, { token }) => {
       try {
-        const deleted = await StudentMemberType.deleteOne({ _id: args._id });
-        return { status: 'Success', message: 'Data had been deleted successfully', content: deleted };
+        let deleted = await StudentMemberType.deleteOne({ _id: args._id });
+        return { status: 'Success', message: 'Data had been deleted successfully', content: {...deleted, _id: args._id} };
       } catch (e) {
         return { status: 'Error', message: 'Failed to delete data...', content: e.message };
       }

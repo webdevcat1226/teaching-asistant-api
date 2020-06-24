@@ -17,6 +17,7 @@ let Teacher = new Schema({
     registrationDate: Date,
     facebook: String,
     instagram: String,
+    twitter: String,
     image: String,
     token: String,
 }, {
